@@ -1,0 +1,26 @@
+---
+title: "Electrophysiological measures of visual suppression"
+author: "Daniel Baker"
+date: "14/02/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+
+## Introduction
+
+## Methods
+
+## Results
+
+## Discussion
+
+## References
+
+
+
+
