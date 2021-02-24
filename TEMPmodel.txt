@@ -1,0 +1,39 @@
+
+  data {
+    int<lower=1> Nsubj ;
+    int<lower=1> Ntotal ;
+    real y[Ntotal] ;
+    real x[Ntotal] ;
+    real<lower=0> w[Ntotal] ;
+    int<lower=1> s[Ntotal] ;
+    real<lower=0> Zvals[Nsubj] ;
+    real<lower=0> pvals[Nsubj] ;
+    real<lower=0> Rvals[Nsubj] ;
+  }
+  parameters {
+    real<lower=0> r[Nsubj] ;
+    real<lower=0> g[Nsubj] ;
+    real<lower=0> sigma ;
+    real<lower=0> rmu ; 
+    real<lower=0> gmu ; 
+    real<lower=0> rsigma ;
+    real<lower=0> gsigma ;
+    real<lower=0> nu ;
+  }
+  model {
+    rmu ~ gamma( 1 , 0.5 ) ;
+    gmu ~ gamma( 1 , 0.5 ) ;
+    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    rsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    gsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    nu ~ exponential(1/30.0) ;
+    r ~ normal( rmu , rsigma ) ; // vectorized
+    g ~ normal( gmu , gsigma ) ; // vectorized
+    for ( i in 1:Ntotal ) {
+      y[i] ~ student_t( 
+                nu ,
+                1 + (Rvals[s[i]]/r[s[i]])*(pow(x[i],pvals[s[i]]))/(g[s[i]]*Zvals[s[i]] + square(x[i])) ,
+                w[i]*sigma ) ;
+    }
+  }  
+  
