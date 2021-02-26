@@ -69,7 +69,7 @@
 
 \title{Electrophysiological measures of visual suppression}
 \author{Daniel H. Baker \& Alex R. Wade}
-\date{2021-02-24}
+\date{2021-02-26}
 
 \begin{document}
 \maketitle
@@ -93,9 +93,9 @@ Several studies have demonstrated that these different types of suppression have
 \caption{Example stimuli and illustration of contrast response functions. Panel (a) shows four stimulus arrangments, illustrating how a vertical target pattern can be combined with four different mask types. Panel (b) shows three varieties of contrast response function, that either continue to accelerate (solid line), saturate (dashed line) or super-saturate (dotted line) across the range of displayable stimulus contrasts. Panel (c) illustrates a contrast gain (dashed line) and a response gain (dotted line) shift, relative to a baseline response (solid line).}\label{fig:stimfig}
 \end{figure}
 
-An important distinction concerns whether a suppressive effect modulates the contrast gain or the response gain of a neuron (or neural population). Changes in contrast gain shift the stimulus-response curve (the contrast response function) laterally, whereas changes in response gain scale the function vertically (see examples in Figure \ref{fig:stimfig}c). These different patterns may be indicative of specific neurophysiological underpinnings for an effect, and potentially different processes might occur at successive stages of processing. Previous studies have found that spatial attention modulates response gain (Itthipuripat et al., 2019), whereas suppression from overlaid masks is more consistent with contrast gain (Tsai et al., 2012). Spatial adaptation appears to affect both contrast and response gain in primary visual cortex (Albrecht et al., 1984), whereas motion adaptation is mostly attributable to contrast gain in area MT (Kohn and Movshon, 2003). In addition, there is evidence that suppression builds up at successive stages of cortical processing, beyond primary visual cortex, and is stronger at later levels in the visual hierarchy {[}REFERENCE{]}. This is especially likely for surround suppression, which might be mediated by higher-level neurons with large receptive fields.
+An important distinction concerns whether a suppressive effect modulates the contrast gain or the response gain of a neuron (or neural population). Changes in contrast gain shift the stimulus-response curve (the contrast response function) laterally, whereas changes in response gain scale the function vertically (see examples in Figure \ref{fig:stimfig}c). These different patterns may be indicative of specific neurophysiological underpinnings for an effect, and potentially different processes might occur at successive stages of processing. Previous studies have found that spatial attention modulates response gain (Itthipuripat et al., 2019), whereas suppression from overlaid masks is more consistent with contrast gain (Tsai et al., 2012). Spatial adaptation appears to affect both contrast and response gain in primary visual cortex (Albrecht et al., 1984), whereas motion adaptation is mostly attributable to contrast gain in area MT (Kohn and Movshon, 2003). In addition, there is evidence that suppression builds up at successive stages of cortical processing, beyond primary visual cortex, and is stronger at later levels in the visual hierarchy (Zenger-Landolt and Heeger, 2003). This is especially likely for surround suppression, which might be mediated by higher-level neurons with large receptive fields.
 
-Neural responses can be measured non-invasively using steady-state visual evoked potentials (SSVEPs; Norcia et al., 2015) recorded with either electroencephalography (EEG) or magnetoencephalography (MEG). By flickering the target stimulus at a fixed frequency, entrained neural oscillations are evoked at the stimulus frequency, and also its higher harmonics (integer multiples of the flicker rate). Previous studies have shown that contrast-response functions measured using SSVEP are strongly modulated by overlaid masks (Baker and Vilidaitė, 2014; Busse et al., 2009; Tsai et al., 2012), dichoptic masks (Baker and Wade, 2017), and surround masks (Benjamin et al., 2018; Xiao and Wade, 2010). However the three types of mask have not been directly compared, and doing so is the purpose of the present study. In particular, we were interested in determining whether each type of suppression is best described as a contrast gain or response gain effect, and whether this changes across different electrode sites and different response frequencies. We repeated the experiment at two different mask contrasts, and analyse the data using a hierarchical Bayesian modelling approach.
+Neural responses can be measured non-invasively using steady-state visual evoked potentials (SSVEPs; Norcia et al., 2015) recorded with either electroencephalography (EEG) or magnetoencephalography (MEG). By flickering the target stimulus at a fixed frequency, entrained neural oscillations are evoked at the stimulus frequency, and also its higher harmonics (integer multiples of the flicker rate). Previous studies have shown that contrast-response functions measured using SSVEP are strongly modulated by overlaid masks (Baker and Vilidaitė, 2014; Busse et al., 2009; Tsai et al., 2012), dichoptic masks (Baker and Wade, 2017; Chadnova et al., 2018), and surround masks (Benjamin et al., 2018; Vanegas et al., 2015; Xiao and Wade, 2010). However the three types of mask have not been directly compared, and doing so is the main purpose of the present study. In particular, we were interested in determining whether each type of suppression is best described as a contrast gain or a response gain effect, and whether this changes across different electrode sites and different response frequencies. A secondary aim was to determine whether suppressive signals saturate as a function of contrast. We repeated our main experiment at two different mask contrasts, and analyse the data using a hierarchical Bayesian modelling approach.
 
 \hypertarget{methods}{%
 \section{Methods}\label{methods}}
@@ -163,7 +163,7 @@ The target stimulus evoked strong steady-state responses at both the first harmo
 \caption{Averaged Fourier spectrum and example contrast response functions. Panel (a) shows the spectrum for a high contrast target, with inset scalp plots showing SNRs at the first and second harmonic frequencies. The spectrum is taken from electrode Oz, indicated by the black points in the scalp plots. The shaded region and error bars indicate ±1 standard error. Panels (b) and (c) show example contrast response functions at the first and second harmonics at electrodes Oz, P1 and T7, averaged across participants (N=12). The inset scalp plots show how the saturation index varies across the head.}\label{fig:fftfig}
 \end{figure}
 
-To quantify how suppression varied across the scalp, and across different mask types and response frequencies, we fitted a hierarchical Bayesian model to the data. The first stage of this process involved estimating values for the free parameters in equation \eqref{eq:GC1}. Figure \ref{fig:modelfig1}a shows an example fit at electrode \emph{Oz} for the low contrast mask experiment. The thick black line gives the fit using the posterior mean parameter estimates (\emph{p} = 1.93, \emph{Z} = 136, \(R_{max}\) = 4.83), and thin lines show predictions for 100 randomly sampled posterior parameter combinations. At the second stage of fitting, we estimated values of the suppressive parameters \emph{g} and \emph{r} for each mask type. Example fits are shown in Figure \ref{fig:modelfig1}b-e, with accompanying posterior distributions of parameter estimates in panels g-j. We assess whether a parameter makes a credible contribution to the response by determining whether the 95\% highest density interval of the posterior (shown by the black bars at the margins of Figure \ref{fig:modelfig1}g-j) encompasses 1. For all four examples shown in Figure \ref{fig:modelfig1}g-j, the contrast gain parameter (\emph{g}, y-axis) was credibly greater than 1, whereas the response gain parameter (\emph{r}, x-axis) was not credibly different from 1. This is evidence that all four mask types modulate responses via contrast gain control at electrode \emph{Oz}, for the first harmonic response.
+To quantify how suppression varied across the scalp, and across different mask types and response frequencies, we fitted a hierarchical Bayesian model to the data. The first stage of this process involved estimating values for the free parameters in equation \eqref{eq:GC1}. Figure \ref{fig:modelfig1}a shows an example fit at electrode \emph{Oz} for the low contrast mask experiment. The thick black line gives the fit using the posterior mean parameter estimates (\emph{p} = 1.94, \emph{Z} = 134.35, \(R_{max}\) = 4.8), and thin lines show predictions for 100 randomly sampled posterior parameter combinations. At the second stage of fitting, we estimated values of the suppressive parameters \emph{g} and \emph{r} for each mask type. Example fits are shown in Figure \ref{fig:modelfig1}b-e, with accompanying posterior distributions of parameter estimates in panels g-j. We assess whether a parameter makes a credible contribution to the response by determining whether the 95\% highest density interval of the posterior (shown by the black bars at the margins of Figure \ref{fig:modelfig1}g-j) encompasses 1. For all four examples shown in Figure \ref{fig:modelfig1}g-j, the contrast gain parameter (\emph{g}, y-axis) was credibly greater than 1, whereas the response gain parameter (\emph{r}, x-axis) was not credibly different from 1. This is evidence that all four mask types modulate responses via contrast gain control at electrode \emph{Oz}, for the first harmonic response.
 
 \begin{figure}
 
@@ -171,10 +171,19 @@ To quantify how suppression varied across the scalp, and across different mask t
 
 }
 
-\caption{Contrast response functions from electrode Oz, with example model fits and posterior parameter estimates. Panel (a) shows the data from the baseline (no mask) condition (points), plotted alongside model curves for the posterior mean of parameter estimates (thick curve), and random posterior samples (thin curves). Panels (b-e) show data for four types of masks in the same format (grey curves duplicate the mean fit from panel (a)). Panel (f) shows the electrode location. Panels (g-j) show posterior density estimates for the response gain (x-axis) and contrast gain (y-axis) weight parameters. Red points show the means, and dashed lines give the value expected in the case of no effect (a weight of 1). For all mask types, the contrast gain weight estimate was substantially greater than 1.}\label{fig:modelfig1}
+\caption{Contrast response functions from electrode Oz, with example model fits and posterior parameter estimates. Panel (a) shows the data from the baseline (no mask) condition (points), plotted alongside model curves for the posterior mean of parameter estimates (thick curve), and random posterior samples (thin curves). Panels (b-e) show data for four types of masks in the same format (grey curves duplicate the mean fit from panel (a)), with the arrows indicating the mask contrast. Panel (f) shows the electrode location. Panels (g-j) show posterior density estimates for the response gain (x-axis) and contrast gain (y-axis) weight parameters. Red points show the means, dashed lines give the value expected in the case of no effect (a weight of 1), and grey and coloured distributions in the margins show the prior and posterior for each parameter. For all mask types, the contrast gain weight estimate was substantially greater than 1.}\label{fig:modelfig1}
 \end{figure}
 
-We repeated the above analysis independently at each electrode, for each response frequency (5 Hz and 10 Hz), and for both experiments (12\% and 24\% mask contrast). Figure \ref{fig:modelfig2} summarises the results for the 12\% mask contrast experiment, and for each mask type. For the first harmonic (5 Hz) response (top two rows), there were strong contrast gain control effects (panels a-d), but little credible effect of response gain (panels e-h). For the second harmonic response (10 Hz), although some contrast gain effects were credible at the occipital pole (electrode \emph{Oz} for all mask types, panels i-l), suppression was better described by response gain (panels m-p). This overall pattern was replicated in our second data set with higher (24\%) contrast masks (Figure \ref{fig:modelfig3}).
+We repeated the above analysis independently at each electrode, for each response frequency (5 Hz and 10 Hz), and for both experiments (12\% and 24\% mask contrast). Figure \ref{fig:modelheads1} summarises the results for the 12\% mask contrast experiment, and for each mask type. For the first harmonic (5 Hz) response (top two rows), there were strong contrast gain control effects (panels a-d), but little credible effect of response gain (panels e-h). For the second harmonic response (10 Hz), although some contrast gain effects were credible at the occipital pole (electrode \emph{Oz} for all mask types, panels i-l), suppression was better described by response gain (panels m-p). Example contrast response functions and posterior distributions at the second harmonic are shown in Figure \ref{fig:modelfig2}. This overall pattern was replicated in our second data set with higher (24\%) contrast masks (Figure \ref{fig:modelheads2}).
+
+\begin{figure}
+
+{\centering \includegraphics{figures/modelheads1} 
+
+}
+
+\caption{Scalp plots summarising the suppressive weights for contrast and response gain from the Bayesian hierarchical model, fitted to data from the low mask contrast experiment. Symbols are filled white when the 95 percent highest density interval of the posterior parameter distribution includes 1 (implying no credible contribution from that type of suppression). Larger symbols correspond to stronger suppression (see the scale in lower right corner), but parameters implying facilitation (values < 1) are not plotted.}\label{fig:modelheads1}
+\end{figure}
 
 \begin{figure}
 
@@ -182,22 +191,92 @@ We repeated the above analysis independently at each electrode, for each respons
 
 }
 
-\caption{Scalp plots summarising the suppressive weights for contrast and response gain from the Bayesian hierarchical model, fitted to data from the low mask contrast experiment. Symbols are filled white when the 95 percent highest density interval of the posterior parameter distribution includes 1 (implying no credible contribution from that type of suppression). Larger symbols correspond to stronger suppression (see the scale in lower right corner), but parameters implying facilitation (values < 1) are not plotted.}\label{fig:modelfig2}
+\caption{Contrast response functions at the second harmonic frequency. Plotting conventions mirror those in Figure 3. Note that the lower SNR at 10 Hz results in noisier data and less precise posterior estimates than at 5 Hz.}\label{fig:modelfig2}
 \end{figure}
 
-Closer inspection of these results reveals some interesting subtleties and differences across mask conditions. Note in particular that the weights for surround suppression at the first harmonic are generally weaker at the occipital pole (electrodes \emph{Oz} and \emph{POz}) than for monocular and dichoptic suppression. But suppressive weights increase at more lateral electrodes over more parietal regions of cortex. For surround suppression, this might reflect the increased suppression in extra-striate cortical regions that have larger receptive fields. More generally, it also suggests that suppression builds up across successive stages of processing. It also appears that, whereas suppression at the first harmonic is primarily due to contrast gain control, suppression at the second harmonic involves changes in both contrast and response gain (see lower two rows of Figures \ref{fig:modelfig2} \& \ref{fig:modelfig3}). This may well reflect the involvement of different classes of neurons - for example, second harmonic responses imply more severe nonlinearities, which might include suppression. This is also consistent with the greater saturation of the second harmonic response (inset to Figure \ref{fig:modelfig1}c).
+Closer inspection of these results reveals some interesting subtleties and differences across mask conditions. Note in particular that the weights for surround suppression at the first harmonic are generally weaker at the occipital pole (electrodes \emph{Oz} and \emph{POz}) than for monocular and dichoptic suppression. But suppressive weights increase at more lateral electrodes over more parietal regions of cortex. For surround suppression, this might reflect the increased suppression in extra-striate cortical regions that have larger receptive fields. More generally, it also suggests that suppression builds up across successive stages of processing. It also appears that, whereas suppression at the first harmonic is primarily due to contrast gain control, suppression at the second harmonic involves changes in both contrast and response gain (see lower two rows of Figures \ref{fig:modelheads1} \& \ref{fig:modelheads2}). This may well reflect the involvement of different classes of neurons - for example, second harmonic responses imply more severe nonlinearities, which might include suppression. This is also consistent with the greater saturation of the second harmonic response (inset to Figure \ref{fig:modelfig1}c).
 
 \begin{figure}
 
-{\centering \includegraphics{figures/modelfig3} 
+{\centering \includegraphics{figures/modelheads2} 
 
 }
 
-\caption{Scalp plots summarising the suppressive weights for contrast and response gain from the Bayesian hierarchical model, fitted to data from the high mask contrast experiment. Plotting conventions are as for Figure 4.}\label{fig:modelfig3}
+\caption{Scalp plots summarising the suppressive weights for contrast and response gain from the Bayesian hierarchical model, fitted to data from the high mask contrast experiment. Plotting conventions are as for Figure 4.}\label{fig:modelheads2}
+\end{figure}
+
+Finally, we asked about the properties of the mask signal. Of particular interest is whether the mask signal itself saturates before suppressing the target. If it does, this implies the presence of a nonlinearity before suppression impacts, as has been shown psychophysically for surround masks (Meese et al., 2009). Figure \ref{fig:masksignals}a shows model predictions for a linear suppressive signal (black curve), and a saturating suppressive signal (blue curve).
+
+We also measured responses at a fixed target contrast (24\%), for mask contrasts that ranged from 0\% to 96\%. For this analysis, we pooled data across the two experiments, giving us N = 21 participants (data for the three participants who completed both experiments were averaged to give a single data set for each of those participants). The results for all four mask types are shown in Figure \ref{fig:masksignals}b-e.
+
+\begin{figure}
+
+{\centering \includegraphics{figures/masksignals} 
+
+}
+
+\caption{.}\label{fig:masksignals}
 \end{figure}
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
+
+We asked whether suppression from four types of mask could be best explained by changes in contrast gain or response gain. Data from two SSVEP experiments showed that at the first harmonic frequency, all four mask types were best explained by contrast gain control, with minimal influence from response gain. However at the second harmonic frequency, both types of gain control were apparent. There was also evidence that the strength of suppression, particularly from the surround, increased away from the occipital pole. Finally, we showed that the suppressive signals from surround masks saturate before impacting the target, suggesting they have passed through a nonlinearity before suppressing other signals.
+
+\hypertarget{distinct-suppressive-pathways-with-a-common-outcome}{%
+\subsection{Distinct suppressive pathways with a common outcome}\label{distinct-suppressive-pathways-with-a-common-outcome}}
+
+\hypertarget{are-previous-ssvep-studies-also-consistent-with-contrast-gain-effects}{%
+\subsection{Are previous SSVEP studies also consistent with contrast gain effects?}\label{are-previous-ssvep-studies-also-consistent-with-contrast-gain-effects}}
+
+(The plan here is to repeat the same Bayesian modelling on data from the literature. Here are 16 studies that report data for one of the mask types. Please add more if you can think of them.)
+
+\emph{Overlay}
+
+Baker \& Vilidaite 2014
+
+Smith 2017
+
+Tsai 2012
+
+Busse 2009 Fig 6c
+
+Candy 2001
+
+Ross \& Speed 1991
+
+Burr \& Morrone 1987
+
+\emph{Dichoptic}
+
+Chadnova 2018
+
+Baker \& Wade 2017
+
+Baker 2015
+
+Zhou 2015
+
+Hou 2020
+
+\emph{Surround}
+
+Vanegas 2015
+
+Benjamin 2018
+
+Ohtani 2002 Fig 7
+
+Vanegas 2019
+
+Figure 8: summary of meta-analysis
+
+What about the Mannion data? We could potentially ask to include it, and add him as an author.
+
+\hypertarget{what-is-suppression-for}{%
+\subsection{What is suppression for?}\label{what-is-suppression-for}}
+
+Mention normalization reweighting and optimal combination
 
 \hypertarget{acknowledgements}{%
 \section{Acknowledgements}\label{acknowledgements}}
@@ -230,6 +309,9 @@ Busse L, Wade AR, Carandini M. 2009. Representation of concurrent stimuli by pop
 \leavevmode\hypertarget{ref-Carpenter2017}{}%
 Carpenter B, Gelman A, Hoffman MD, Lee D, Goodrich B, Betancourt M, Brubaker M, Guo J, Li P, Riddell A. 2017. Stan: A probabilistic programming language. \emph{Journal of Statistical Software, Articles} \textbf{76}:1--32. doi:\href{https://doi.org/10.18637/jss.v076.i01}{10.18637/jss.v076.i01}
 
+\leavevmode\hypertarget{ref-Chadnova2018}{}%
+Chadnova E, Reynaud A, Clavagnier S, Baker DH, Baillet S, Hess RF. 2018. Interocular interaction of contrast and luminance signals in human primary visual cortex. \emph{Neuroimage} \textbf{167}:23--30. doi:\href{https://doi.org/10.1016/j.neuroimage.2017.10.035}{10.1016/j.neuroimage.2017.10.035}
+
 \leavevmode\hypertarget{ref-Cook2016}{}%
 Cook E, Hammett ST, Larsson J. 2016. GABA predicts visual intelligence. \emph{Neurosci Lett} \textbf{632}:50--4. doi:\href{https://doi.org/10.1016/j.neulet.2016.07.053}{10.1016/j.neulet.2016.07.053}
 
@@ -257,6 +339,9 @@ Ledgeway T, Zhan C, Johnson AP, Song Y, Baker CL Jr. 2005. The direction-selecti
 \leavevmode\hypertarget{ref-Li2005}{}%
 Li B, Peterson MR, Thompson JK, Duong T, Freeman RD. 2005. Cross-orientation suppression: Monoptic and dichoptic mechanisms are different. \emph{J Neurophysiol} \textbf{94}:1645--50. doi:\href{https://doi.org/10.1152/jn.00203.2005}{10.1152/jn.00203.2005}
 
+\leavevmode\hypertarget{ref-Meese2009}{}%
+Meese TS, Challinor KL, Summers RJ, Baker DH. 2009. Suppression pathways saturate with contrast for parallel surrounds but not for superimposed cross-oriented masks. \emph{Vision Res} \textbf{49}:2927--35. doi:\href{https://doi.org/10.1016/j.visres.2009.09.006}{10.1016/j.visres.2009.09.006}
+
 \leavevmode\hypertarget{ref-Nassi2013}{}%
 Nassi JJ, Lomber SG, Born RT. 2013. Corticocortical feedback contributes to surround suppression in v1 of the alert primate. \emph{J Neurosci} \textbf{33}:8504--17. doi:\href{https://doi.org/10.1523/JNEUROSCI.5124-12.2013}{10.1523/JNEUROSCI.5124-12.2013}
 
@@ -272,10 +357,16 @@ Sengpiel F, Vorobyov V. 2005. Intracortical origins of interocular suppression i
 \leavevmode\hypertarget{ref-Tsai2012}{}%
 Tsai JJ, Wade AR, Norcia AM. 2012. Dynamics of normalization underlying masking in human visual cortex. \emph{J Neurosci} \textbf{32}:2783--9. doi:\href{https://doi.org/10.1523/JNEUROSCI.4485-11.2012}{10.1523/JNEUROSCI.4485-11.2012}
 
+\leavevmode\hypertarget{ref-Vanegas2015}{}%
+Vanegas MI, Blangero A, Kelly SP. 2015. Electrophysiological indices of surround suppression in humans. \emph{J Neurophysiol} \textbf{113}:1100--9. doi:\href{https://doi.org/10.1152/jn.00774.2014}{10.1152/jn.00774.2014}
+
 \leavevmode\hypertarget{ref-Xiao2010}{}%
 Xiao B, Wade AR. 2010. Measurements of long-range suppression in human opponent s-cone and achromatic luminance channels. \emph{J Vis} \textbf{10}:10. doi:\href{https://doi.org/10.1167/10.13.10}{10.1167/10.13.10}
 
 \leavevmode\hypertarget{ref-Yoon2010}{}%
 Yoon JH, Maddock RJ, Rokem A, Silver MA, Minzenberg MJ, Ragland JD, Carter CS. 2010. GABA concentration is reduced in visual cortex in schizophrenia and correlates with orientation-specific surround suppression. \emph{J Neurosci} \textbf{30}:3777--81. doi:\href{https://doi.org/10.1523/JNEUROSCI.6158-09.2010}{10.1523/JNEUROSCI.6158-09.2010}
+
+\leavevmode\hypertarget{ref-Zenger-Landolt2003}{}%
+Zenger-Landolt B, Heeger DJ. 2003. Response suppression in v1 agrees with psychophysics of surround masking. \emph{J Neurosci} \textbf{23}:6884--93.
 
 \end{document}
