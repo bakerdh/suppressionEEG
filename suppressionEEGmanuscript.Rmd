@@ -256,15 +256,47 @@ knitr::include_graphics('figures/stimfig.pdf')
 
 An important distinction concerns whether a suppressive effect modulates the contrast gain or the response gain of a neuron (or neural population). Changes in contrast gain shift the stimulus-response curve (the contrast response function) laterally, whereas changes in response gain scale the function vertically (see examples in Figure \@ref(fig:stimfig)c). These different patterns may be indicative of specific neurophysiological underpinnings for an effect, and potentially different processes might occur at successive stages of processing. Previous studies have found that spatial attention modulates response gain [@Itthipuripat2019], whereas suppression from overlaid masks is more consistent with contrast gain [@Tsai2012]. Spatial adaptation appears to affect both contrast and response gain in primary visual cortex [@Albrecht1984], whereas motion adaptation is mostly attributable to contrast gain in area MT [@Kohn2003]. In addition, there is evidence that suppression builds up at successive stages of cortical processing, beyond primary visual cortex, and is stronger at later levels in the visual hierarchy [@Zenger-Landolt2003]. This is especially likely for surround suppression, which might be mediated by higher-level neurons with large receptive fields.
 
-Neural responses can be measured non-invasively using steady-state visual evoked potentials [SSVEPs; @Norcia2015] recorded with either electroencephalography (EEG) or magnetoencephalography (MEG). By flickering the target stimulus at a fixed frequency, entrained neural oscillations are evoked at the stimulus frequency, and also its higher harmonics (integer multiples of the flicker rate). Previous studies have shown that contrast-response functions measured using SSVEP are strongly modulated by overlaid masks [@Busse2009; @Tsai2012; @Baker2014], dichoptic masks [@Baker2017; @Chadnova2018], and surround masks [@Xiao2010; @Vanegas2015; @Benjamin2018]. However the three types of mask have not been directly compared, and doing so is the main purpose of the present study. In particular, we were interested in determining whether each type of suppression is best described as a contrast gain or a response gain effect, and whether this changes across different electrode sites and different response frequencies. A secondary aim was to determine whether suppressive signals saturate as a function of contrast. We repeated our main experiment at two different mask contrasts, and analyse the data using a hierarchical Bayesian modelling approach.
+Neural responses can be measured non-invasively using steady-state visual evoked potentials [SSVEPs; @Norcia2015] recorded with either electroencephalography (EEG) or magnetoencephalography (MEG). By flickering the target stimulus at a fixed frequency, entrained neural oscillations are evoked at the stimulus frequency, and also its higher harmonics (integer multiples of the flicker rate). Previous studies have shown that contrast-response functions measured using SSVEP are strongly modulated by overlaid masks [@Busse2009; @Tsai2012; @Baker2014], dichoptic masks [@Baker2017; @Chadnova2018], and surround masks [@Xiao2010; @Vanegas2015; @Benjamin2018].
+
+We begin by conducting a computational re-analysis of 15 published studies to determine whether each type of suppression is best described as a contrast gain or a response gain effect. We then report results from a new SSVEP study to directly compare four mask types using a common paradigm. This also allowed us to explore changes across different electrode sites and different response frequencies. A secondary aim was to determine whether suppressive signals saturate as a function of contrast. We repeated the main experiment at two different mask contrasts, and analyse the data using a hierarchical Bayesian modelling approach.
 
 # Methods
 
-## Participants
+## Computational meta-analysis
 
-Twelve participants completed each version of the experiment (3 participants completed both experiments, the remaining 9 were unique to each experiment). All participants had normal or corrected-to-normal vision, and no known visual abnormalities. Participants were briefed on the experimental protocols and purpose, and provided written informed consent.
+### Inclusion criteria
 
-## Apparatus and stimuli
+Studies were included if they reported steady-state contrast response functions measured in human adults with no known disorders. Responses at 3 or more target contrasts were required to fit the baseline functions. We also required that a mask stimulus was presented in at least one condition. This could either be overlaid, dichoptic (presented to the opposite eye from a monocular target), or surrounding the target. We divided the surround conditions into those where the surround was aligned with (parallel to) the target, and those where it was orthogonal. For the overlay and dichoptic conditions, some studies used gratings and others used noise stimuli. Where multiple masking conditions were reported, we included data at the lowest mask contrast tested, and used data with orthogonal masks in preference to aligned masks (for overlay and dichoptic conditions). In studies where an experimental manipulation was carried out, we used data from the baseline (pre-manipulation) condition. We searched online databases using search terms including _SSVEP_, _steady-state_, _dichoptic_, _surround_, _mask_ and _suppression_, and applied the above criteria, resulting in 15 studies for inclusion in the analysis.
+
+### Analysis and modelling
+
+Contrast response function data were extracted using a computer program (WebPlotDigitizer) from the figures in each paper. Where necessary, these were converted to signal-to-noise ratios by dividing by the response to a blank screen, or at adjacent frequency bins to the target, or to the lowest target contrast condition. In some cases, results were averaged across different temporal frequency conditions to provide a single data set for each study.
+
+Our primary objective was to understand the relative contributions of contrast gain and response gain to suppression from different mask types. We quantified this using a two-stage modelling approach. At the first stage, we fitted a gain control model with three free parameters to the baseline data using a downhill simplex algorithm. The model is defined as:
+
+\begin{equation}
+\label{eq:GC1}
+resp = R_{max}\frac{C^p}{Z + C^2} + 1,
+\end{equation}
+
+where _C_ is the target contrast. The $Z$ parameter sets the horizontal position, $p$ governs the function shape (see Figure \@ref(fig:stimfig)b) from accelerating (_p_ > 2) to saturating (_p_ = 2) to super-saturating (_p_ < 2), and $R_{max}$ scales the overall height of the function. The additive constant (+1) represents additive noise, and converts the model response to a signal-to-noise ratio (implicitly, we also divide _resp_ by 1, but this is omitted as it has no effect). We fitted the model independently to each study's baseline data by minimising the root-mean-squared error between model and data.
+
+The second stage of fitting used the parameter estimates from the first stage, and fitted the responses in the presence of a mask using the equation:
+
+\begin{equation}
+\label{eq:GC2}
+resp = \frac{R_{max}}{r} \times \frac{C^p}{gZ + C^2} + 1,
+\end{equation}
+
+where the new terms _r_ and _g_ are free parameters that govern the extent of response gain and contrast gain, respectively. Values of _r_, _g_ > 1 indicate suppression, though in principle masks can also cause facilitation (_r_, _g_ < 1). We estimated values of these parameters jointly using the data from all studies (separately for each mask type) in a hierarchical Bayesian model. We defined broad hyperpriors for _g_ and _r_ as gamma distributions, with parameters $\alpha$ = 1.5, $\beta$ = 0.5. These functions peak at $\frac{\alpha-1}{\beta}$ = 1, so the prior expectation before observing any data is that there is no suppression of either kind. The priors had greater probability mass at values > 1, reflecting our expectation that one or both parameters would produce suppression, but also extended below 1, ensuring that the model was capable of capturing facilitation where it appeared in the data. Both parameters were constrained to have positive values. Bayesian modelling was implemented in _Stan_ [@Carpenter2017], based on an example script for hierarchical nonlinear regression accompanying Chapter 17 of @Kruschke2014. We examined how the posterior distribution of each parameter varied with mask type, both for individual studies, and across the whole sample.
+
+## Experimental study
+
+### Participants
+
+Twelve participants completed each version of the experiment (3 participants completed both experiments, the remaining 9 were unique to each experiment). All participants had normal or corrected-to-normal vision, and no known visual abnormalities. Participants were briefed on the experimental protocols and purpose, and provided written informed consent. The study was approved by the Department of Psychology Ethics Committee at the University of York.
+
+### Apparatus and stimuli
 
 Stimuli were presented using a ViewPixx 3D display (VPixx Technologies Inc., Quebec, Canada), driven by a Mac Pro computer. The refresh rate was 120 Hz, and we interleaved frames intended for the left and right eyes (60 Hz refresh rate per eye). To enable stereo presentation, the display update was synchronised with a set of NVidia 3D pro active shutter glasses using an infra-red signal. The display had a resolution of 1920 $\times$ 1280 pixels, and was viewed from a distance of 57cm, at which one degree of visual angle had a diameter of 36 pixels. To ensure good contrast resolution, the display was run in the high bit-depth monochrome M16 mode, which provided 16 bits of greyscale resolution. A Minolta LS110 photometer was used to gamma corrected the display, which had a maximum luminance of 102 $cd/m^2$.
 
@@ -274,37 +306,341 @@ We measured target responses with no mask, and also with four categories of mask
 
 EEG activity was recorded using a 64-channel ANT Neuroscan system sampling at 1 kHz. Participants wore Waveguard caps, with electrodes organised according to the 10/20 system. The ground was located at position _AFz_, and each channel was referenced to the whole-head average. Electrode impedance was maintained at or below 5 k$\Omega$ throughout the experiment. Digital parallel triggers were sent from the ViewPixx display to the EEG amplifier, and recorded the onset of each trial on the EEG trace. Data were amplified, digitised, and saved to disc for offline analysis.
 
-## Procedure
+### Procedure
 
 After providing consent, participants were set up with an EEG cap of appropriate size. They then completed six blocks, each comprising a full repetition of the experiment. Blocks lasted around 10 minutes, with the opportunity to take breaks between blocks. Within each block, all 42 conditions were repeated once in a randomized order. Trials lasted 11 seconds, with an inter-trial interval of 3 seconds. Participants were asked to monitor the central fixation and, as far as possible, to minimise blinking when a stimulus was displayed. To maintain attention, the central fixation marker was changed occasionally by resampling the positions and luminances of the squares. There was a 50% chance of this happening on each trial. Participants were asked to count the number of times the fixation marker changed, and report this at the end of the block.
 
-## Data analysis and modelling
+### Data analysis and modelling
 
 All data were converted from the native ANT-EEProbe format to a compressed comma-separated value (csv) text file using a custom _Matlab_ script and components of the EEGlab toolbox [@Delorme2004]. The data for each participant were then loaded into _R_ for analysis. A ten-second waveform for each trial at each electrode was extracted, omitting the first one second after stimulus onset to avoid transients. The fast Fourier transform was calculated for each waveform, and the spectrum stored in a matrix. All repetitions of each condition were then coherently averaged (i.e. taking both the phase and amplitude into account), before being converted to a signal-to-noise ratio by dividing the amplitude at each frequency by the mean amplitude of the neighbouring 10 bins ($\pm0.5$ Hz in steps of 0.1 Hz). The signal-to-noise ratio at the target flicker frequency (5 Hz) and its second harmonic (10 Hz) were then used as dependent variables for further analysis.
 
-Our primary objective was to understand the relative contributions of contrast gain and response gain to suppression from different mask types. We quantified this using a two-stage hierarchical Bayesian modelling approach, which incorporates the data from individual participants. At the first stage, we fitted a gain control model with three free parameters to the baseline data. The model is defined as:
-
-\begin{equation}
-\label{eq:GC1}
-resp = R_{max}\frac{C^p}{Z + C^2} + 1,
-\end{equation}
-
-where _C_ is the target contrast. The $Z$ parameter sets the horizontal position, $p$ governs the function shape from accelerating (_p_ > 2) to saturating (_p_ = 2) to super-saturating (_p_ < 2), and $R_{max}$ scales the overall height of the function. The additive constant (+1) represents additive noise, and converts the response to a signal-to-noise ratio (implicitly, we also divide _resp_ by 1, but this is omitted as it has no effect). We fitted the model to each participant's baseline data, and obtained estimates of the three free parameters independently at each electrode location. The hyperpriors for each parameter were normal distributions with parameters: $\mu$ = 50, $\sigma$ = 20 (_Z_); $\mu$ = 2, $\sigma$ = 0.25 (_p_); and $\mu$ = 4, $\sigma$ = 2 ($R_{max}$). All parameters were constrained to have positive values.
-
-The second stage of fitting used the mean posterior parameter estimates from the first stage (for each participant), and fitted the contrast response function for each mask type using the equation:
-
-\begin{equation}
-\label{eq:GC2}
-resp = \frac{R_{max}}{r} \times \frac{C^p}{gZ + C^2} + 1,
-\end{equation}
-
-where the new terms _r_ and _g_ are free parameters that govern the extent of response gain and contrast gain, respectively. Values of _r_, _g_ > 1 indicate suppression, though in principle masks can also cause facilitation (_r_, _g_ < 1). We estimated values of these parameters jointly at each electrode location and for each mask type, again using the data from all participants in a hierarchical model. We defined broad hyperpriors for _g_ and _r_ as gamma distributions, with parameters $\alpha$ = 1.5, $\beta$ = 0.5 [MAYBE CHANGE TO 1.2 AND 0.2]. These functions peak at $\frac{\alpha-1}{\beta}$ = 1, so the prior expectation before observing empirical data is that there is no suppression of either kind. The priors had greater probability mass at values > 1, reflecting our expectation that one or both parameters would produce suppression, but also extended below 1, ensuring that the model was also capable of capturing facilitation where it appeared in the data. Bayesian modelling was implemented in _Stan_ [@Carpenter2017], based on an example script for hierarchical nonlinear regression accompanying Chapter 17 of @Kruschke2014. We examined how the posterior mean of each parameter varied as a function of mask type, electrode position, and response frequency.
+We modelled the data using a two-stage Bayesian hierarchical model similar to that described above for the computational meta-analysis. Here, participant was the unit of observation instead of study. The other main difference was that we also used a hierarchical model (instead of simplex fitting) at the first stage to fit the parameters of the baseline contrast response function (_Z_, _p_ and $R_{max}$). This seemed appropriate for our novel data set, given that all participants viewed the same stimuli, whereas in the computational meta-analysis different studies had different stimulus parameters. The hyperpriors for each parameter were normal distributions with parameters: $\mu$ = 100, $\sigma$ = 40 (_Z_); $\mu$ = 2, $\sigma$ = 0.25 (_p_); and $\mu$ = 5, $\sigma$ = 2 ($R_{max}$). All parameters were constrained to have positive values. Again, we were most interested in the posterior distributions of the suppression parameters (_r_ and _g_), and explored how these varied by mask type, electrode position, and response frequency.
 
 ## Data and script availability
 
 All data and scripts are publicly available at: [https://osf.io/e62wu/](https://osf.io/e62wu/)
 
 # Results
+
+## Previous studies do not sufficiently distinguish contrast vs response gain
+
+We began by conducting a computational meta-analysis of 15 SSVEP studies from the literature. The results are shown in Figure \@ref(fig:metaanalysis). For each study, we replot the contrast response functions at baseline (black points), and with the mask present (coloured points), along with model fits (curves). The model described the data well. The kernel density functions show posterior distributions of parameters for the response gain parameter (_r_, grey distributions), and the contrast gain parameter (_g_, coloured distributions). For each mask type, the vertical dashed line indicates no suppression (a weight of 1). The 95% highest density intervals are given by the horizontal bars - where these overlap 1 we lack credible evidence for that type of suppression.
+
+For individual studies, we see some credible evidence for contrast gain (10 data sets) and response gain (3 data sets), but a clear pattern does not emerge. For the group posterior distributions given at the foot of each panel, all of the 95% highest density intervals overlap 1. This suggests that overall, the literature does not give a consistent picture of whether response gain or contrast gain is responsible for each type of suppression (though the mean weights for contrast gain are much higher on average). To address this shortcoming, we conducted a new study in which participants viewed stimuli involving all four types of mask.
+
+```{r include=FALSE}
+
+# create Figure 8 - meta analysis of 15 studies
+if (runcode==1){
+  
+conditionnames <- c('Overlay','Dichoptic','Aligned surround', 'Orthogonal surround')  
+vertsize <- c(8,8,4,4)
+
+options(mc.cores=3)
+
+fitbaseline <- function(p){
+  p <- 10^p
+  model <- 1 + p[3]*(Cvals^p[2])/(p[1] + Cvals^2)
+  rms <- sqrt(mean((model-yvals)^2))
+return(rms)}  
+
+# second model definition sets up a hierarchical model that fits two parameters - r and g, to modulate response gain and contrast gain
+genMCMC2 = function(data, xName="C", yName="y", sName="s", fixedparams=NULL, wName=NULL, numSavedSteps=10000, thinSteps = 1, saveName=NULL){ 
+  require(rstan)
+  #-----------------------------------------------------------------------------
+  # THE DATA.
+  y = data[,yName]
+  x = data[,xName]
+  s = as.numeric(data[,sName])
+  if ( !is.null(wName) ) {
+    w = data[,wName]
+  } else {
+    w = rep(1,length(y))
+  }
+  Zvals = fixedparams[,1]
+  pvals = fixedparams[,2]
+  Rvals = fixedparams[,3]
+  
+  # Do some checking that data make sense:
+  if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
+  if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
+  #Ntotal = length(y)
+  # Specify the data in a list, for later shipment to JAGS:
+  dataList = list(
+    x = x ,
+    y = y ,
+    s = s ,
+    w = w ,
+    Zvals = Zvals ,
+    pvals = pvals ,
+    Rvals = Rvals ,
+    Nsubj = max(s)  , # should equal length(unique(s))
+    Ntotal = length(y)
+  )
+  #-----------------------------------------------------------------------------
+  # THE MODEL.
+  
+  modelString = "
+  data {
+    int<lower=1> Nsubj ;
+    int<lower=1> Ntotal ;
+    real y[Ntotal] ;
+    real x[Ntotal] ;
+    real<lower=0> w[Ntotal] ;
+    int<lower=1> s[Ntotal] ;
+    real<lower=0> Zvals[Nsubj] ;
+    real<lower=0> pvals[Nsubj] ;
+    real<lower=0> Rvals[Nsubj] ;
+  }
+  parameters {
+    real<lower=0> r[Nsubj] ;
+    real<lower=0> g[Nsubj] ;
+    real<lower=0> sigma ;
+    real<lower=0> rmu ; 
+    real<lower=0> gmu ; 
+    real<lower=0> rsigma ;
+    real<lower=0> gsigma ;
+    real<lower=0> nu ;
+  }
+  model {
+    rmu ~ gamma( 1.5 , 0.5 ) ;
+    gmu ~ gamma( 1.5 , 0.5 ) ;
+    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    rsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    gsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    nu ~ exponential(1/30.0) ;
+    r ~ normal( rmu , rsigma ) ; // vectorized
+    g ~ normal( gmu , gsigma ) ; // vectorized
+    for ( i in 1:Ntotal ) {
+      y[i] ~ student_t( 
+                nu ,
+                1 + (Rvals[s[i]]/r[s[i]])*(pow(x[i],pvals[s[i]]))/(g[s[i]]*Zvals[s[i]] + square(x[i])) ,
+                w[i]*sigma ) ;
+    }
+  }  
+  " # close quote for modelString
+  
+  # Write out modelString to a text file
+  writeLines( modelString , con="TEMPmodel.txt" )
+  #-----------------------------------------------------------------------------
+  # INTIALIZE THE CHAINS.
+  
+  # Use lm() to find reasonable coefficients overall, then start all individual
+  # units and overall at those values.
+  # N.B. THIS DOES NOT ALWAYS WORK AND DOES NOT ALWAYS IMPROVE THE MCMC SAMPLE.
+  # IF IT'S A PROBLEM, COMMENT OUT THE inits ARGUMENT IN THE run.jags COMMAND.
+  rinit = 1
+  ginit = 1
+  sigmaInit = 1
+  nuInit = 10 # arbitrary
+  initsList = list(
+    sigma=sigmaInit  ,
+    nu=nuInit ,
+    rmu=rinit ,
+    gmu=ginit ,
+    r=rep(rinit,max(s)) ,
+    g=rep(ginit,max(s))  # other params filled in by JAGS
+  )
+  
+  #-----------------------------------------------------------------------------
+  # RUN THE CHAINS
+  parameters = c( "r" ,  "g" ,
+                  "rmu" , "gmu" ,
+                  "sigma" , "nu")
+  adaptSteps = 1000  # Number of steps to "tune" the samplers
+  burnInSteps = 2000 
+  nChains = 3 
+  
+  # Translate to C++ and compile to DSO:
+  stanDso <- stan_model( model_code=modelString ) 
+  # Get MC sample of posterior:
+  stanFit <- sampling( object=stanDso , 
+                       data = dataList , 
+                       #pars = parameters , # optional
+                       #init = initsList , # optional  
+                       chains = nChains ,
+                       iter = ( ceiling(numSavedSteps/nChains)*thinSteps
+                                +burnInSteps ) , 
+                       warmup = burnInSteps , 
+                       thin = thinSteps,
+                       cores = getOption("mc.cores", 1L))
+  # For consistency with JAGS-oriented functions in DBDA2E collection, 
+  # convert stan format to coda format:
+  codaSamples = mcmc.list( lapply( 1:ncol(stanFit) , 
+                                   function(x) { mcmc(as.array(stanFit)[,x,]) } ) )
+  # resulting codaSamples object has these indices: 
+  #   codaSamples[[ chainIdx ]][ stepIdx , paramIdx ]
+  if ( !is.null(saveName) ) {
+    save( codaSamples , file=paste(saveName,"Mcmc.Rdata",sep="") )
+    save( stanFit , file=paste(saveName,"StanFit.Rdata",sep="") )
+    save( stanDso , file=paste(saveName,"StanDso.Rdata",sep="") )
+  }  
+  
+  return( codaSamples )
+}
+
+  metdata <- read.csv('temp/MAdata.csv')
+  condnames <- levels(metdata$Mask)
+  condnames <- condnames[c(2,1,3,4)]
+  
+  pdf(paste('figures/metaanalysis.pdf',sep=''), bg="transparent", height = 10, width = 10)
+  # par(mfrow=c(2,2), mar=c(2,3,2,1))
+  layout(matrix(c(1,3,2,4),2,2),c(1,1),c(8,5))
+  
+for (cond in 1:4){  
+  
+  thiscond <- droplevels(subset(metdata, Mask==condnames[cond]))
+  studynames <- levels(thiscond$Study)
+  nstudies <- nlevels(thiscond$Study)
+  
+  bl <- droplevels(subset(thiscond, Condition==1, select=c('Study','Contrast','SNR')))
+  colnames(bl) <- c('s','C','y')
+  bl$s <- as.numeric(bl$s)
+
+paramlist <- matrix(0,nrow=nstudies,ncol=5)
+for (s in 1:nstudies){
+i <- which(bl$s==s)
+Cvals <<- bl$C[i]
+yvals <<- bl$y[i]
+sout <- fminsearch(fitbaseline,log10(c(100,2,4)))
+  paramlist[s,1:3] <- 10^sout$optbase$xopt
+}
+
+    mm <- droplevels(subset(thiscond, Condition==2, select=c('Study','Contrast','SNR')))
+  colnames(mm) <- c('s','C','y')
+  mm$s <- as.numeric(mm$s)
+
+mcmcCoda2 <- genMCMC2(mm,xName='C',yName='y',sName='s',fixedparams=paramlist,numSavedSteps=nchains)
+
+  groupr <- NULL
+  groupg <- NULL
+  for (i in 1:length(mcmcCoda)){
+  groupr <- c(groupr,mcmcCoda2[[i]][,(2*nstudies)+2])
+  groupg <- c(groupg,mcmcCoda2[[i]][,(2*nstudies)+3])  
+  }
+  
+  studyr <- matrix(0,nrow=nstudies,ncol=12000)
+  studyg <- matrix(0,nrow=nstudies,ncol=12000)
+  for (s in 1:nstudies){
+  allr <- NULL
+  allg <- NULL
+  for (i in 1:length(mcmcCoda2)){
+  allr <- c(allr,mcmcCoda2[[i]][,s])
+  allg <- c(allg,mcmcCoda2[[i]][,s+nstudies])
+  }
+  studyr[s,] <- allr
+  studyg[s,] <- allg
+  paramlist[s,4:5] <- c(mean(allr),mean(allg))
+  }
+  
+  
+  plot(x=NULL,y=NULL,axes=FALSE, ann=FALSE, xlim=c(0,3), ylim=c(0,vertsize[cond]))
+  title(main=conditionnames[cond])
+  
+  finecontsC <- 10^((-14:40)/20)
+  for (n in 1:nstudies){
+    text(0,vertsize[cond]+0.2-n,studynames[n],pos=4)
+    lines(c(0.8,1.8),vertsize[cond]-c(n,n))
+    lines(c(2,3),vertsize[cond]-c(n,n))}
+  lines(c(2,3),c(0,0))
+  
+  for (n in 1:nstudies){
+    tofit <- droplevels(subset(thiscond, Study==studynames[n]))
+
+    baseline <- subset(tofit, Condition==1, select = c('Contrast','SNR'))
+    mask <- subset(tofit, Condition==2, select = c('Contrast','SNR'))
+    
+    baseline$Contrast[which(baseline$Contrast==0)] <- 0.2
+    mask$Contrast[which(mask$Contrast==0)] <- 0.2
+    baseline$SNR <- baseline$SNR-1
+    mask$SNR <- mask$SNR-1
+    xvals <- 0.8+(14+20*log10(baseline$Contrast))/54
+    yvals <- (vertsize[cond]-n)+0.8*(baseline$SNR/max(baseline$SNR))
+    points(xvals,yvals,pch=16)
+    
+    blmod <- paramlist[n,3]*(finecontsC^paramlist[n,2])/(paramlist[n,1] + finecontsC^2)
+    xvalsmod <- 0.8+(14+20*log10(finecontsC))/54
+    yvalsmod <- (vertsize[cond]-n)+0.8*(blmod/max(baseline$SNR))
+    lines(xvalsmod,yvalsmod,col=colourlist[1])
+    
+    xvals <- 0.8+(14+20*log10(mask$Contrast))/54
+    yvals <- (vertsize[cond]-n)+0.8*(mask$SNR/max(baseline$SNR))
+    points(xvals,yvals,pch=16,col=colourlist[cond+1])
+        
+    mmod <- (paramlist[n,3]/paramlist[n,4])*(finecontsC^paramlist[n,2])/(paramlist[n,5]*paramlist[n,1] + finecontsC^2)
+    yvalsmod <- (vertsize[cond]-n)+0.8*(mmod/max(baseline$SNR))
+    lines(xvalsmod,yvalsmod,col=colourlist[cond+1])    
+    
+    a <- density(studyr[n,],from=0,to=15)
+    kernx <- c(0,a$x,15)
+    kerny <- c(0,a$y,0)
+    kernx <- 2 + (kernx/15)
+    kerny <- (vertsize[cond]-n)+0.8*(kerny/max(kerny))
+    polygon(kernx,kerny,col=addalpha('black',0.5),border=NA)
+    
+    a <- density(studyg[n,],from=0,to=15)
+    kernx <- c(0,a$x,15)
+    kerny <- c(0,a$y,0)
+    kernx <- 2 + (kernx/15)
+    kerny <- (vertsize[cond]-n)+0.8*(kerny/max(kerny))
+    polygon(kernx,kerny,col=addalpha(colourlist[cond+1],0.5),border=NA)  
+    
+ci <- hdi(studyr[n,],ci=hdirange)
+yplace <- (vertsize[cond]-n)+0.6
+arrows(2+(ci$CI_low/15),yplace, x1=2+(ci$CI_high/15), y1=yplace,length=0.015, angle=90, lwd=2)
+arrows(2+(ci$CI_high/15),yplace, x1=2+(ci$CI_low/15), y1=yplace,length=0.015, angle=90, lwd=2)
+
+ci <- hdi(studyg[n,],ci=hdirange)
+yplace <- (vertsize[cond]-n)+0.3
+arrows(2+(ci$CI_low/15),yplace, x1=2+(ci$CI_high/15), y1=yplace,length=0.015, angle=90, lwd=2,col=colourlist[cond+1])
+arrows(2+(ci$CI_high/15),yplace, x1=2+(ci$CI_low/15), y1=yplace,length=0.015, angle=90, lwd=2,col=colourlist[cond+1])
+
+  }
+  
+  text(0.8,0.2,'Group posterior',pos=4)
+  
+    a <- density(groupr,from=0,to=15)
+    kernx <- c(0,a$x,15)
+    kerny <- c(0,a$y,0)
+    kernx <- 2 + (kernx/15)
+    kerny <- 0.8*(kerny/max(kerny))
+    polygon(kernx,kerny,col=addalpha('black',0.5),border=NA)
+    
+    a <- density(groupg,from=0,to=15)
+    kernx <- c(0,a$x,15)
+    kerny <- c(0,a$y,0)
+    kernx <- 2 + (kernx/15)
+    kerny <- 0.8*(kerny/max(kerny))
+    polygon(kernx,kerny,col=addalpha(colourlist[cond+1],0.5),border=NA)  
+    
+    ci <- hdi(groupr,ci=hdirange)
+yplace <- 0.6
+arrows(2+(ci$CI_low/15),yplace, x1=2+(ci$CI_high/15), y1=yplace,length=0.015, angle=90, lwd=2)
+arrows(2+(ci$CI_high/15),yplace, x1=2+(ci$CI_low/15), y1=yplace,length=0.015, angle=90, lwd=2)
+
+ci <- hdi(groupg,ci=hdirange)
+yplace <- 0.3
+arrows(2+(ci$CI_low/15),yplace, x1=2+(ci$CI_high/15), y1=yplace,length=0.015, angle=90, lwd=2,col=colourlist[cond+1])
+arrows(2+(ci$CI_high/15),yplace, x1=2+(ci$CI_low/15), y1=yplace,length=0.015, angle=90, lwd=2,col=colourlist[cond+1])
+
+     lines(c(2,2)+(1/15),c(0,vertsize[cond]),lty=2)
+     
+}
+
+  dev.off()
+  
+}
+
+```
+
+```{r metaanalysis, fig.cap="Computational re-analysis of 15 studies from the literature reporting SSVEP measures of suppression.", fig.align="center", echo=FALSE}
+
+knitr::include_graphics('figures/metaanalysis.pdf')
+
+```
+
+
+## Suppression is due to contrast gain at the first harmonic for all mask types
 
 ```{r include=FALSE}
 
@@ -1232,6 +1568,8 @@ knitr::include_graphics('figures/modelfig1.pdf')
 
 ```
 
+## Suppression across electrode and scalp location
+
 We repeated the above analysis independently at each electrode, for each response frequency (5 Hz and 10 Hz), and for both experiments (12% and 24% mask contrast). Figure \@ref(fig:modelheads1) summarises the results for the 12% mask contrast experiment, and for each mask type. For the first harmonic (5 Hz) response (top two rows), there were strong contrast gain control effects (panels a-d), but little credible effect of response gain (panels e-h). For the second harmonic response (10 Hz), although some contrast gain effects were credible at the occipital pole (electrode _Oz_ for all mask types, panels i-l), suppression was better described by response gain (panels m-p). Example contrast response functions and posterior distributions at the second harmonic are shown in Figure \@ref(fig:modelfig2). This overall pattern was replicated in our second data set with higher (24%) contrast masks (Figure \@ref(fig:modelheads2)).
 
 ```{r include=FALSE}
@@ -1380,7 +1718,9 @@ knitr::include_graphics('figures/modelheads2.pdf')
 
 ```
 
-Finally, we asked about the properties of the mask signal. Of particular interest is whether the mask signal itself saturates before suppressing the target. If it does, this implies the presence of a nonlinearity before suppression impacts, as has been shown psychophysically for surround masks [@Meese2009]. Figure \@ref(fig:masksignals)a shows model predictions for a linear suppressive signal (black curve), and a saturating suppressive signal (blue curve).
+## Limited saturation of mask signals
+
+Finally, we asked about the properties of the mask signal. Of particular interest is whether the mask signal itself saturates before suppressing the target. If it does, this implies the presence of a nonlinearity before suppression impacts, as has been shown psychophysically for surround masks [@Meese2009]. Figure \@ref(fig:masksignals)a shows model predictions for a linear suppressive signal (black curve), and a saturating suppressive signal (red curve). We therefore measured responses at a fixed (24%) target contrast, for mask contrasts that ranged from 0% to 96%. For this analysis, we pooled data across the two experiments, giving us N = 21 participants (data for the three participants who completed both experiments were averaged to give a single data set for each of those participants). The results for all four mask types are shown in Figure \@ref(fig:masksignals)b-e. At both the first and second harmonic frequencies, the target response decreased as a function of mask contrast. For the highest contrast monocular and dichoptic masks, this resulted in an almost complete suppression of the target response (SNR ~ 1). For the surround masks at the first harmonic there was still a substantial signal even with the highest (96%) contrast masks.
 
 ```{r include=FALSE}
 
@@ -1479,7 +1819,7 @@ SImask[1,,] <- sqrt(2)*SImask[1,,]  # compensate for different contrasts
     plotlims <- c(-rmax,rmax,-rmax,rmax)  
     par(pty="s",mar=c(0,0,0,0))  # make axis square
     plot(x=NULL,y=NULL,ann=FALSE, axes=FALSE, xlim=plotlims[1:2], ylim=plotlims[3:4]) 
-    image(xo,xo,zo2,zlim=c(-0.75,0.75),col=colmatrix1,add=TRUE,useRaster=TRUE)
+    image(xo,xo,zo2,zlim=c(-0.8,0.8),col=colmatrix1,add=TRUE,useRaster=TRUE)
     maskx <- c(hdata$OutlineX[1:51]*2.2,hdata$OutlineX[51:1])
     masky <- c(hdata$OutlineY[1:51]*2.2,hdata$OutlineY[51:1])
     polygon(maskx,masky,border=NA,col="white")
@@ -1520,6 +1860,17 @@ par(mfrow=c(2,5), mar=c(2,3,2,1))
   title(main=titletext[1])
   lines(c(0,40),c(1,1))
 text(3,5.8,paste('(',letters[1],')',sep=''),cex=1.5)
+
+p <- 1.94
+Rmax <- 4.8
+Z <- 134
+C <- 24
+linearresp <- 1 + Rmax*(C^p)/(Z + C^2 + 50*finecontsC)
+lines(finecontsdB,linearresp,lwd=2)
+masksignal <- (finecontsC^p)/(Z + finecontsC^2)
+satresp <- 1 + Rmax*(C^p)/(Z + C^2 + 2000*masksignal^2)
+lines(finecontsdB,satresp,col='red',lty=2,lwd=2)
+legend(12,6,c('Linear','Saturating'),col=c('black','red'),lwd=2,lty=1:2,box.lwd=1.5)
 
 for (m in 1:4){
   par(pty="s")  # make axis square
@@ -1565,8 +1916,8 @@ text(3,5.8,paste('(',letters[m+1],')',sep=''),cex=1.5)
   ystart <- 0.2
   e1 <- readTIFF('temp/colourbar.tiff')
   rasterImage(e1,xstart,ystart,xstart+imwidth*aspratio,ystart+imwidth)
-  text(0.41,0.25,'-0.3',pos=4,cex=1.2)
-  text(0.4,0.75,'0.3',pos=4,cex=1.2)
+  text(0.41,0.25,'-0.8',pos=4,cex=1.2)
+  text(0.4,0.75,'0.8',pos=4,cex=1.2)
   text(0.45,0.5,'SI',pos=4,cex=1.5)
   
   aspratio <- 1.25  # this is the aspect ratio of the output pdf
@@ -1592,11 +1943,10 @@ file.remove('temp/colourbar.tiff')
 
 }
 ```
-  
-  
-We also measured responses at a fixed target contrast (24%), for mask contrasts that ranged from 0% to 96%. For this analysis, we pooled data across the two experiments, giving us N = 21 participants (data for the three participants who completed both experiments were averaged to give a single data set for each of those participants). The results for all four mask types are shown in Figure \@ref(fig:masksignals)b-e.
 
-```{r masksignals, fig.cap=".", fig.align="center", echo=FALSE}
+We calculated a modified saturation index that takes into account the inversion of the functions. This was defined as the difference between responses at the highest two mask contrasts (48% - 96%), scaled by the minimum of the function (we adjusted the index for the monocular mask to take into account the lower mask contrast used). Again, positive values imply acceleration of masking, values of 0 saturation, and negative values supersaturation, but this time applied to the mask signal. At electrode _Oz_, the saturation index was near or below zero for monocular and dichoptic masks at the first harmonic, and surround masks at the second harmonic. Across the scalp (Figure \@ref(fig:masksignals)f-i), a range of saturation indices were apparent, though the mean index overall was positive (SI = 0.1).
+
+```{r masksignals, fig.cap="Summary of the effects of varying mask contrast. Panel (a) shows the predictions of a gain control model (equation 1) for different levels of mask contrast. In the linear model (black), the suppressive signal is a linear function of mask contrast. In the nonlinear model (red), the suppressive signal has itself passed through a nonlinear transducer function before suppressing the target. Panels (b - e) show empirical data for four mask types, at the first and second harmonic frequencies (black borders and black fills, respectively). Error bars and shaded regions show ±1 standard error of the mean across N = 21 participants. Panels (f - i) show how the modified saturation index varies across the scalp.", fig.align="center", echo=FALSE}
 
 knitr::include_graphics('figures/masksignals.pdf')
 
@@ -1604,58 +1954,11 @@ knitr::include_graphics('figures/masksignals.pdf')
 
 # Discussion
 
-We asked whether suppression from four types of mask could be best explained by changes in contrast gain or response gain. Data from two SSVEP experiments showed that at the first harmonic frequency, all four mask types were best explained by contrast gain control, with minimal influence from response gain. However at the second harmonic frequency, both types of gain control were apparent. There was also evidence that the strength of suppression, particularly from the surround, increased away from the occipital pole. Finally, we showed that the suppressive signals from surround masks saturate before impacting the target, suggesting they have passed through a nonlinearity before suppressing other signals.
+We asked whether suppression from four types of mask could be best explained by changes in contrast gain or response gain. Data from two SSVEP experiments showed that at the first harmonic frequency, all four mask types were best explained by contrast gain control, with minimal influence from response gain. However at the second harmonic frequency, both types of gain control were apparent. There was also evidence that the strength of suppression, particularly from the surround, increased away from the occipital pole. Finally, we asked whether suppressive signals saturate before impacting the target, and found some evidence of this for monocular and dichoptic masks at the first harmonic, and surround masks at the second harmonic.
 
 ## Distinct suppressive pathways with a common outcome
 
-
-## Are previous SSVEP studies also consistent with contrast gain effects?
-
-(The plan here is to repeat the same Bayesian modelling on data from the literature. Here are 16 studies that report data for one of the mask types. Please add more if you can think of them.)
-
-\emph{Overlay}
-
-Baker & Vilidaite 2014
-
-Smith 2017
-
-Tsai 2012
-
-Busse 2009 Fig 6c
-
-Candy 2001
-
-Ross & Speed 1991
-
-Burr & Morrone 1987
-
-\emph{Dichoptic}
-
-Chadnova 2018
-
-Baker & Wade 2017
-
-Baker 2015
-
-Zhou 2015
-
-Hou 2020
-
-\emph{Surround}
-
-Vanegas 2015
-
-Benjamin 2018
-
-Ohtani 2002 Fig 7
-
-Vanegas 2019
-
-
-Figure 8: summary of meta-analysis
-
-
-What about the Mannion data? We could potentially ask to include it, and add him as an author.
+Facilitation
 
 ## What is suppression for?
 
