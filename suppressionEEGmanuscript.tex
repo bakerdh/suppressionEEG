@@ -5,7 +5,6 @@
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
-\usepackage{rotating}
 \usepackage{fixltx2e} % provides \textsubscript
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
@@ -70,7 +69,7 @@
 
 \title{Electrophysiological measures of visual suppression}
 \author{Daniel H. Baker, Greta Vilidaite \& Alex R. Wade}
-\date{2021-03-02}
+\date{2021-03-14}
 
 \begin{document}
 \maketitle
@@ -178,7 +177,7 @@ All data and scripts are publicly available at: \url{https://osf.io/e62wu/}
 
 We began by conducting a computational meta-analysis of 15 SSVEP studies from the literature (Baker et al., 2015; Baker and Vilidaitė, 2014; Baker and Wade, 2017; Benjamin et al., 2018; Burr and Morrone, 1987; Busse et al., 2009; Candy et al., 2001; Chadnova et al., 2018; Hou et al., 2020; Ross and Speed, 1991; Smith et al., 2017; Tsai et al., 2012; Vanegas et al., 2019, 2015; Zhou et al., 2015). Study-specific information is given in Table \ref{tab:metatable} and the results are shown in Figure \ref{fig:metaanalysis}. For each study, we replot the contrast response functions for the target alone (black points), and with the mask present (coloured points), along with model fits (curves). The model described the data well. The kernel density functions show posterior distributions of parameters for the response gain parameter (\emph{r}, grey distributions), and the contrast gain parameter (\emph{g}, coloured distributions). For each mask type, the vertical dashed line indicates no suppression (a weight of 1). The 95\% highest density intervals are given by the horizontal bars - where these overlap 1 we lack credible evidence for that type of suppression.
 
-\begin{sidewaystable}
+\begin{table}
 
 \caption{\label{tab:metatable}Table summarising methodological details for each study in the meta analysis. N: number of participants, SI: saturation index.}
 \centering
@@ -217,7 +216,7 @@ Vanegas (2019) & EEG & 11 & 1 c/deg grating & 25 & Aligned Surround & Pz, POz, O
 Benjamin (2018) & EEG & 13 & 2 c/deg grating & 7 & Aligned and Orthogonal Surround & Oz & -0.01\\
 \hline
 \end{tabular}
-\end{sidewaystable}
+\end{table}
 
 For individual studies, we see some credible evidence for contrast gain (8 data sets) and response gain (4 data sets), but a consistent pattern does not emerge. For the group posterior distributions given at the foot of each panel, all of the 95\% highest density intervals overlap 1. This suggests that overall the literature does not give a consistent picture of whether response gain or contrast gain is responsible for each type of suppression (though the mean weights for contrast gain are much higher on average). This could be for any number of reasons, but is likely to be partly due to the methodological heterogeneity across studies (see Table \ref{tab:metatable}). To address this shortcoming, we conducted a new study in which participants viewed stimuli involving all four types of mask.
 

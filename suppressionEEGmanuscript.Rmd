@@ -17,9 +17,9 @@ csl: elife.csl
 
 ```{r setup, include=FALSE}
 
-runcode <- 0  # this flag chooses whether to run the underlying analysis code (1), or just load in the figures from the last time this was run (0)
+runcode <- 1  # this flag chooses whether to run the underlying analysis code (1), or just load in the figures from the last time this was run (0)
 processraw <- 0  # this flag determines whether the raw data are downloaded from OSF and processed - this will require ~30GB of hard drive space and take several hours
-runmodels <- 0 # this flag sets whether to run the Stan models - there are 2 * 64 * 5 = 640 separate models, so they take ~5 hours to run
+runmodels <- 0 # this flag sets whether to run the Stan models - there are 2 * 2 * 64 * 5 = 1280 separate models, so they take ~8 hours to run
 
 # to fix the table orientation, add:
 # \usepackage{rotating} to the start of the latex file
@@ -90,6 +90,111 @@ colour.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nt
 
 ```
 
+```{r include=FALSE}
+
+# set up Stan models now to save repeatedly compiling (saves time)
+if (runcode==1){
+  
+  modelString = "
+  data {
+    int<lower=1> Nsubj ;
+    int<lower=1> Ntotal ;
+    real y[Ntotal] ;
+    real x[Ntotal] ;
+    real<lower=0> w[Ntotal] ;
+    int<lower=1> s[Ntotal] ;
+  }
+  parameters {
+    real<lower=1> Z[Nsubj] ;
+    real<lower=1> p[Nsubj] ;
+    real<lower=0> Rmax[Nsubj] ;
+    real<lower=0> sigma ;
+    real<lower=1> Zmu ; 
+    real<lower=1> pmu ; 
+    real<lower=0> Rmaxmu ; 
+    real<lower=0> Zsigma ;
+    real<lower=0> psigma ;
+    real<lower=0> Rmaxsigma ;
+    real<lower=0> nu ;
+  }
+  model {
+    Zmu ~ normal( 100 , 40 ) ;
+    pmu ~ normal( 2 , 0.25 ) ;
+    Rmaxmu ~ normal( 5 , 2 ) ;
+    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    Zsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    psigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    Rmaxsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    nu ~ exponential(1/30.0) ;
+    Z ~ normal( Zmu , Zsigma ) ; // vectorized
+    p ~ normal( pmu , psigma ) ; // vectorized
+    Rmax ~ normal( Rmaxmu , Rmaxsigma ) ; // vectorized
+    for ( i in 1:Ntotal ) {
+      y[i] ~ student_t( 
+                nu ,
+                1 + (Rmax[s[i]]*(pow(x[i],p[s[i]]))/(Z[s[i]] + square(x[i]))) ,
+                w[i]*sigma ) ;
+    }
+  }  
+  " # close quote for modelString
+  
+  # Write out modelString to a text file
+  writeLines(modelString, con="TEMPmodel.txt")
+  # Translate to C++ and compile to DSO:
+  baselinemodel <- stan_model(model_code=modelString)   
+  
+    
+    modelString = "
+  data {
+    int<lower=1> Nsubj ;
+    int<lower=1> Ntotal ;
+    real y[Ntotal] ;
+    real x[Ntotal] ;
+    real<lower=0> w[Ntotal] ;
+    int<lower=1> s[Ntotal] ;
+    real<lower=0> Zvals[Nsubj] ;
+    real<lower=0> pvals[Nsubj] ;
+    real<lower=0> Rvals[Nsubj] ;
+  }
+  parameters {
+    real<lower=0> r[Nsubj] ;
+    real<lower=0> g[Nsubj] ;
+    real<lower=0> sigma ;
+    real<lower=0> rmu ; 
+    real<lower=0> gmu ; 
+    real<lower=0> rsigma ;
+    real<lower=0> gsigma ;
+    real<lower=0> nu ;
+  }
+  model {
+    rmu ~ gamma( 1.5 , 0.5 ) ;
+    gmu ~ gamma( 1.5 , 0.5 ) ;
+    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    rsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    gsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
+    nu ~ exponential(1/30.0) ;
+    r ~ normal( rmu , rsigma ) ; // vectorized
+    g ~ normal( gmu , gsigma ) ; // vectorized
+    for ( i in 1:Ntotal ) {
+      y[i] ~ student_t( 
+                nu ,
+                1 + (Rvals[s[i]]/r[s[i]])*(pow(x[i],pvals[s[i]]))/(g[s[i]]*Zvals[s[i]] + square(x[i])) ,
+                w[i]*sigma ) ;
+    }
+  }  
+  " # close quote for modelString
+    
+    # Write out modelString to a text file
+    writeLines(modelString, con="TEMPmodel.txt")
+    # Translate to C++ and compile to DSO:
+    suppmodel <- stan_model(model_code=modelString)   
+  
+    file.remove('TEMPmodel.txt')   # clean up file
+}
+# the two Stan models are now stored in baselinemodel and suppmodel
+
+```
+  
 # Abstract
 
 
@@ -340,19 +445,24 @@ kable(tabledata, caption = 'Table summarising methodological details for each st
 
 For individual studies, we see some credible evidence for contrast gain (8 data sets) and response gain (4 data sets), but a consistent pattern does not emerge. For the group posterior distributions given at the foot of each panel, all of the 95% highest density intervals overlap 1. This suggests that overall the literature does not give a consistent picture of whether response gain or contrast gain is responsible for each type of suppression (though the mean weights for contrast gain are much higher on average). This could be for any number of reasons, but is likely to be partly due to the methodological heterogeneity across studies (see Table \@ref(tab:metatable)). To address this shortcoming, we conducted a new study in which participants viewed stimuli involving all four types of mask.
 
-```{r include=FALSE}
+```{r include=FALSE, results='hide'}
 
 # create Figure 2 - meta analysis of 15 studies
 if (runcode==1){
   
-  nchains <- 30000    # total number of MCMC chains
+  numSavedSteps <- 30000    # total number of MCMC steps
+  adaptSteps = 1000  # Number of steps to "tune" the samplers
+  burnInSteps = 2000 
+  thinSteps <- 1
+  nChains = 3 
+  options(mc.cores=3)
+  
   rsigcount <- 0
   gsigcount <- 0
   
   conditionnames <- c('Overlay','Dichoptic','Aligned surround', 'Orthogonal surround')  
   vertsize <- c(8,8,4,4)
   
-  options(mc.cores=3)
   
   fitbaseline <- function(p){
     p <- 10^p
@@ -360,147 +470,11 @@ if (runcode==1){
     rms <- sqrt(mean((model-yvals)^2))
     return(rms)}  
   
-  # second model definition sets up a hierarchical model that fits two parameters - r and g, to modulate response gain and contrast gain
-  genMCMC2 = function(data, xName="C", yName="y", sName="s", fixedparams=NULL, wName=NULL, numSavedSteps=10000, thinSteps = 1, saveName=NULL){ 
-    require(rstan)
-    #-----------------------------------------------------------------------------
-    # THE DATA.
-    y = data[,yName]
-    x = data[,xName]
-    s = as.numeric(data[,sName])
-    if ( !is.null(wName) ) {
-      w = data[,wName]
-    } else {
-      w = rep(1,length(y))
-    }
-    Zvals = fixedparams[,1]
-    pvals = fixedparams[,2]
-    Rvals = fixedparams[,3]
-    
-    # Do some checking that data make sense:
-    if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
-    if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
-    #Ntotal = length(y)
-    # Specify the data in a list, for later shipment to JAGS:
-    dataList = list(
-      x = x ,
-      y = y ,
-      s = s ,
-      w = w ,
-      Zvals = Zvals ,
-      pvals = pvals ,
-      Rvals = Rvals ,
-      Nsubj = max(s)  , # should equal length(unique(s))
-      Ntotal = length(y)
-    )
-    #-----------------------------------------------------------------------------
-    # THE MODEL.
-    
-    modelString = "
-  data {
-    int<lower=1> Nsubj ;
-    int<lower=1> Ntotal ;
-    real y[Ntotal] ;
-    real x[Ntotal] ;
-    real<lower=0> w[Ntotal] ;
-    int<lower=1> s[Ntotal] ;
-    real<lower=0> Zvals[Nsubj] ;
-    real<lower=0> pvals[Nsubj] ;
-    real<lower=0> Rvals[Nsubj] ;
-  }
-  parameters {
-    real<lower=0> r[Nsubj] ;
-    real<lower=0> g[Nsubj] ;
-    real<lower=0> sigma ;
-    real<lower=0> rmu ; 
-    real<lower=0> gmu ; 
-    real<lower=0> rsigma ;
-    real<lower=0> gsigma ;
-    real<lower=0> nu ;
-  }
-  model {
-    rmu ~ gamma( 1.5 , 0.5 ) ;
-    gmu ~ gamma( 1.5 , 0.5 ) ;
-    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    rsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    gsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    nu ~ exponential(1/30.0) ;
-    r ~ normal( rmu , rsigma ) ; // vectorized
-    g ~ normal( gmu , gsigma ) ; // vectorized
-    for ( i in 1:Ntotal ) {
-      y[i] ~ student_t( 
-                nu ,
-                1 + (Rvals[s[i]]/r[s[i]])*(pow(x[i],pvals[s[i]]))/(g[s[i]]*Zvals[s[i]] + square(x[i])) ,
-                w[i]*sigma ) ;
-    }
-  }  
-  " # close quote for modelString
-    
-    # Write out modelString to a text file
-    writeLines( modelString , con="TEMPmodel.txt" )
-    #-----------------------------------------------------------------------------
-    # INTIALIZE THE CHAINS.
-    
-    # Use lm() to find reasonable coefficients overall, then start all individual
-    # units and overall at those values.
-    # N.B. THIS DOES NOT ALWAYS WORK AND DOES NOT ALWAYS IMPROVE THE MCMC SAMPLE.
-    # IF IT'S A PROBLEM, COMMENT OUT THE inits ARGUMENT IN THE run.jags COMMAND.
-    rinit = 1
-    ginit = 1
-    sigmaInit = 1
-    nuInit = 10 # arbitrary
-    initsList = list(
-      sigma=sigmaInit  ,
-      nu=nuInit ,
-      rmu=rinit ,
-      gmu=ginit ,
-      r=rep(rinit,max(s)) ,
-      g=rep(ginit,max(s))  # other params filled in by JAGS
-    )
-    
-    #-----------------------------------------------------------------------------
-    # RUN THE CHAINS
-    parameters = c( "r" ,  "g" ,
-                    "rmu" , "gmu" ,
-                    "sigma" , "nu")
-    adaptSteps = 1000  # Number of steps to "tune" the samplers
-    burnInSteps = 2000 
-    nChains = 3 
-    
-    # Translate to C++ and compile to DSO:
-    stanDso <- stan_model( model_code=modelString ) 
-    # Get MC sample of posterior:
-    stanFit <- sampling( object=stanDso , 
-                         data = dataList , 
-                         #pars = parameters , # optional
-                         #init = initsList , # optional  
-                         chains = nChains ,
-                         iter = ( ceiling(numSavedSteps/nChains)*thinSteps
-                                  +burnInSteps ) , 
-                         warmup = burnInSteps , 
-                         thin = thinSteps,
-                         cores = getOption("mc.cores", 1L))
-    # For consistency with JAGS-oriented functions in DBDA2E collection, 
-    # convert stan format to coda format:
-    codaSamples = mcmc.list( lapply( 1:ncol(stanFit) , 
-                                     function(x) { mcmc(as.array(stanFit)[,x,]) } ) )
-    # resulting codaSamples object has these indices: 
-    #   codaSamples[[ chainIdx ]][ stepIdx , paramIdx ]
-    if ( !is.null(saveName) ) {
-      save( codaSamples , file=paste(saveName,"Mcmc.Rdata",sep="") )
-      save( stanFit , file=paste(saveName,"StanFit.Rdata",sep="") )
-      save( stanDso , file=paste(saveName,"StanDso.Rdata",sep="") )
-    }  
-    
-    return( codaSamples )
-  }
-  
   metdata <- read.csv('temp/MAdata.csv')
   condnames <- levels(metdata$Mask)
   condnames <- condnames[c(2,1,3,4)]
   
   pdf(paste('figures/metaanalysis.pdf',sep=''), bg="transparent", height = 10, width = 10)
-  # par(mfrow=c(2,2), mar=c(2,3,2,1))
   layout(matrix(c(1,3,2,4),2,2),c(1,1),c(8,5))
   
   for (cond in 1:4){  
@@ -526,7 +500,33 @@ if (runcode==1){
     colnames(mm) <- c('s','C','y')
     mm$s <- as.numeric(mm$s)
     
-    mcmcCoda2 <- genMCMC2(mm,xName='C',yName='y',sName='s',fixedparams=paramlist,numSavedSteps=nchains)
+    # THE DATA.
+    y = mm[,'y']
+    x = mm[,'C']
+    s = as.numeric(mm[,'s'])
+    w = rep(1,length(y))
+    Zvals = paramlist[,1]
+    pvals = paramlist[,2]
+    Rvals = paramlist[,3]
+    
+    # Do some checking that data make sense:
+    if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
+    if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
+    
+    dataList = list(x = x, y = y, s = s, w = w, Zvals = Zvals, pvals = pvals, Rvals = Rvals, Nsubj = max(s), Ntotal = length(y))
+    
+    # Get MC sample of posterior:
+    stanFit <- sampling(object=suppmodel, 
+                        data = dataList, 
+                        chains = nChains,
+                        iter = (ceiling(numSavedSteps/nChains)*thinSteps
+                                +burnInSteps), 
+                        warmup = burnInSteps, 
+                        thin = thinSteps,
+                        cores = getOption("mc.cores", 1L))
+    # For consistency with JAGS-oriented functions in DBDA2E collection, 
+    # convert stan format to coda format:
+    mcmcCoda2 = mcmc.list(lapply( 1:ncol(stanFit), function(x){mcmc(as.array(stanFit)[,x,])}))
     
     groupr <- NULL
     groupg <- NULL
@@ -535,8 +535,8 @@ if (runcode==1){
       groupg <- c(groupg,mcmcCoda2[[i]][,(2*nstudies)+3])  
     }
     
-    studyr <- matrix(0,nrow=nstudies,ncol=nchains)
-    studyg <- matrix(0,nrow=nstudies,ncol=nchains)
+    studyr <- matrix(0,nrow=nstudies,ncol=numSavedSteps)
+    studyg <- matrix(0,nrow=nstudies,ncol=numSavedSteps)
     for (s in 1:nstudies){
       allr <- NULL
       allg <- NULL
@@ -797,366 +797,148 @@ if (runcode==1){
   
 ```{r include=FALSE, echo=FALSE, warning=FALSE, results='hide'}
 
-# set up and run Stan models, save outputs
+# run Stan models, save outputs
 if (runmodels==1){
   
-nchains <- 12000    # total number of MCMC chains (should be at least 10000)
-options(mc.cores=3)
-  
-# first model definition sets up a hierarchical model that fits three parameters - Z, p and Rmax to fit the baseline data
-genMCMC = function(data, xName="C", yName="y", sName="s", wName=NULL, numSavedSteps=10000, thinSteps = 1, saveName=NULL){ 
-  require(rstan)
-  #-----------------------------------------------------------------------------
-  # THE DATA.
-  y = data[,yName]
-  x = data[,xName]
-  s = as.numeric(data[,sName])
-  if ( !is.null(wName) ) {
-    w = data[,wName]
-  } else {
-    w = rep(1,length(y))
-  }
-  # Do some checking that data make sense:
-  if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
-  if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
-  #Ntotal = length(y)
-  # Specify the data in a list, for later shipment to JAGS:
-  dataList = list(
-    x = x ,
-    y = y ,
-    s = s ,
-    w = w ,
-    Nsubj = max(s)  , # should equal length(unique(s))
-    Ntotal = length(y)
-  )
-  #-----------------------------------------------------------------------------
-  # THE MODEL.
-  
-  modelString = "
-  data {
-    int<lower=1> Nsubj ;
-    int<lower=1> Ntotal ;
-    real y[Ntotal] ;
-    real x[Ntotal] ;
-    real<lower=0> w[Ntotal] ;
-    int<lower=1> s[Ntotal] ;
-  }
-  parameters {
-    real<lower=1> Z[Nsubj] ;
-    real<lower=1> p[Nsubj] ;
-    real<lower=0> Rmax[Nsubj] ;
-    real<lower=0> sigma ;
-    real<lower=1> Zmu ; 
-    real<lower=1> pmu ; 
-    real<lower=0> Rmaxmu ; 
-    real<lower=0> Zsigma ;
-    real<lower=0> psigma ;
-    real<lower=0> Rmaxsigma ;
-    real<lower=0> nu ;
-  }
-  model {
-    Zmu ~ normal( 100 , 40 ) ;
-    pmu ~ normal( 2 , 0.25 ) ;
-    Rmaxmu ~ normal( 5 , 2 ) ;
-    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    Zsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    psigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    Rmaxsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    nu ~ exponential(1/30.0) ;
-    Z ~ normal( Zmu , Zsigma ) ; // vectorized
-    p ~ normal( pmu , psigma ) ; // vectorized
-    Rmax ~ normal( Rmaxmu , Rmaxsigma ) ; // vectorized
-    for ( i in 1:Ntotal ) {
-      y[i] ~ student_t( 
-                nu ,
-                1 + (Rmax[s[i]]*(pow(x[i],p[s[i]]))/(Z[s[i]] + square(x[i]))) ,
-                w[i]*sigma ) ;
-    }
-  }  
-  " # close quote for modelString
-  
-  # Write out modelString to a text file
-  writeLines( modelString , con="TEMPmodel.txt" )
-  #-----------------------------------------------------------------------------
-  # INTIALIZE THE CHAINS.
-  
-  # Use lm() to find reasonable coefficients overall, then start all individual
-  # units and overall at those values.
-  # N.B. THIS DOES NOT ALWAYS WORK AND DOES NOT ALWAYS IMPROVE THE MCMC SAMPLE.
-  # IF IT'S A PROBLEM, COMMENT OUT THE inits ARGUMENT IN THE run.jags COMMAND.
-  Zinit = 50
-  pinit = 2
-  Rmaxinit = 5
-  sigmaInit = 1
-  nuInit = 10 # arbitrary
-  initsList = list(
-    sigma=sigmaInit  ,
-    nu=nuInit ,
-    Zmu=Zinit ,
-    pmu=pinit ,
-    Rmaxmu=Rmaxinit ,
-    Z=rep(Zinit,max(s)) ,
-    p=rep(pinit,max(s)) ,
-    Rmax=rep(Rmaxinit,max(s)) # other params filled in by JAGS
-  )
-  
-  #-----------------------------------------------------------------------------
-  # RUN THE CHAINS
-  parameters = c( "Z" ,  "p" ,  "Rmax" ,
-                  "Zmu" , "pmu" , "Rmaxmu" ,
-                  "sigma" , "nu")
+  numSavedSteps <- 12000    # total number of MCMC steps
   adaptSteps = 1000  # Number of steps to "tune" the samplers
   burnInSteps = 2000 
+  thinSteps <- 1
   nChains = 3 
+  options(mc.cores=3)  
   
-  # Translate to C++ and compile to DSO:
-  stanDso <- stan_model( model_code=modelString ) 
-  # Get MC sample of posterior:
-  stanFit <- sampling( object=stanDso , 
-                       data = dataList , 
-                       #pars = parameters , # optional
-                       #init = initsList , # optional  
-                       chains = nChains ,
-                       iter = ( ceiling(numSavedSteps/nChains)*thinSteps
-                                +burnInSteps ) , 
-                       warmup = burnInSteps , 
-                       thin = thinSteps,
-                       cores = getOption("mc.cores", 1L))
-  # For consistency with JAGS-oriented functions in DBDA2E collection, 
-  # convert stan format to coda format:
-  codaSamples = mcmc.list( lapply( 1:ncol(stanFit) , 
-                                   function(x) { mcmc(as.array(stanFit)[,x,]) } ) )
-  # resulting codaSamples object has these indices: 
-  #   codaSamples[[ chainIdx ]][ stepIdx , paramIdx ]
-  if ( !is.null(saveName) ) {
-    save( codaSamples , file=paste(saveName,"Mcmc.Rdata",sep="") )
-    save( stanFit , file=paste(saveName,"StanFit.Rdata",sep="") )
-    save( stanDso , file=paste(saveName,"StanDso.Rdata",sep="") )
-  }  
+  posteriorweights <- array(0,dim=c(2,64,8,2,numSavedSteps))
+  posteriorparams <- array(0,dim=c(2,64,6,numSavedSteps))
   
-  return( codaSamples )
-}
-
-# second model definition sets up a hierarchical model that fits two parameters - r and g, to modulate response gain and contrast gain
-genMCMC2 = function(data, xName="C", yName="y", sName="s", fixedparams=NULL, wName=NULL, numSavedSteps=10000, thinSteps = 1, saveName=NULL){ 
-  require(rstan)
-  #-----------------------------------------------------------------------------
-  # THE DATA.
-  y = data[,yName]
-  x = data[,xName]
-  s = as.numeric(data[,sName])
-  if ( !is.null(wName) ) {
-    w = data[,wName]
-  } else {
-    w = rep(1,length(y))
-  }
-  Zvals = fixedparams[,1]
-  pvals = fixedparams[,2]
-  Rvals = fixedparams[,3]
+  currentch <- 1
+  currentexpt <- 1
+  currentfreq <- 1
+  if (file.exists('temp/modelweights.RData')==1){load('temp/modelweights.RData')}
   
-  # Do some checking that data make sense:
-  if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
-  if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
-  #Ntotal = length(y)
-  # Specify the data in a list, for later shipment to JAGS:
-  dataList = list(
-    x = x ,
-    y = y ,
-    s = s ,
-    w = w ,
-    Zvals = Zvals ,
-    pvals = pvals ,
-    Rvals = Rvals ,
-    Nsubj = max(s)  , # should equal length(unique(s))
-    Ntotal = length(y)
-  )
-  #-----------------------------------------------------------------------------
-  # THE MODEL.
-  
-  modelString = "
-  data {
-    int<lower=1> Nsubj ;
-    int<lower=1> Ntotal ;
-    real y[Ntotal] ;
-    real x[Ntotal] ;
-    real<lower=0> w[Ntotal] ;
-    int<lower=1> s[Ntotal] ;
-    real<lower=0> Zvals[Nsubj] ;
-    real<lower=0> pvals[Nsubj] ;
-    real<lower=0> Rvals[Nsubj] ;
-  }
-  parameters {
-    real<lower=0> r[Nsubj] ;
-    real<lower=0> g[Nsubj] ;
-    real<lower=0> sigma ;
-    real<lower=0> rmu ; 
-    real<lower=0> gmu ; 
-    real<lower=0> rsigma ;
-    real<lower=0> gsigma ;
-    real<lower=0> nu ;
-  }
-  model {
-    rmu ~ gamma( 1.5 , 0.5 ) ;
-    gmu ~ gamma( 1.5 , 0.5 ) ;
-    sigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    rsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    gsigma ~ uniform( 1.0E-3 , 1.0E+3 ) ;
-    nu ~ exponential(1/30.0) ;
-    r ~ normal( rmu , rsigma ) ; // vectorized
-    g ~ normal( gmu , gsigma ) ; // vectorized
-    for ( i in 1:Ntotal ) {
-      y[i] ~ student_t( 
-                nu ,
-                1 + (Rvals[s[i]]/r[s[i]])*(pow(x[i],pvals[s[i]]))/(g[s[i]]*Zvals[s[i]] + square(x[i])) ,
-                w[i]*sigma ) ;
+  for (freq in currentfreq:2){
+    for (expt in currentexpt:2){
+      for (ch in currentch:64){
+        save(file=paste('temp/progressfileF',freq,'E',expt,'Ch',ch,'.Rdata',sep=''),list='ch')
+        
+        tempcontrasts <- c(0,6,12,24,48,96)
+        if (expt==1){bl <- melt(abs(allSNRlow[,1,1:6,ch,tindex[freq]]))}
+        if (expt==2){bl <- melt(abs(allSNRhi[,1,1:6,ch,tindex[freq]]))}
+        colnames(bl) <- c('s','C','y')
+        bl[,'C'] <- tempcontrasts[bl[,'C']]
+        
+        # THE DATA.
+        y = bl[,'y']
+        x = bl[,'C']
+        s = as.numeric(bl[,'s'])
+        w = rep(1,length(y))
+        
+        # Do some checking that data make sense:
+        if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
+        if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
+        
+        dataList = list(x = x, y = y, s = s, w = w, Nsubj = max(s), Ntotal = length(y))
+        
+        # Get MC sample of posterior:
+        stanFit <- sampling(object=baselinemodel, 
+                            data = dataList, 
+                            chains = nChains,
+                            iter = (ceiling(numSavedSteps/nChains)*thinSteps
+                                    +burnInSteps), 
+                            warmup = burnInSteps, 
+                            thin = thinSteps,
+                            cores = getOption("mc.cores", 1L))
+        # For consistency with JAGS-oriented functions in DBDA2E collection, 
+        # convert stan format to coda format:
+        mcmcCoda = mcmc.list(lapply(1:ncol(stanFit), function(x){mcmc(as.array(stanFit)[,x,])}))
+        
+        paramlist <- matrix(0,nrow=12,ncol=3)
+        for (s in 1:12){
+          allZ <- NULL
+          allp <- NULL
+          allRmax <- NULL
+          for (i in 1:length(mcmcCoda)){
+            allZ <- c(allZ,mcmcCoda[[i]][,s])
+            allp <- c(allp,mcmcCoda[[i]][,s+12])
+            allRmax <- c(allRmax,mcmcCoda[[i]][,s+24])
+          }
+          paramlist[s,] <- c(mean(allZ),mean(allp),mean(allRmax))
+        }
+        
+        allZ <- NULL
+        allp <- NULL
+        allRmax <- NULL
+        for (i in 1:length(mcmcCoda)){
+          allZ <- c(allZ,mcmcCoda[[i]][,38])
+          allp <- c(allp,mcmcCoda[[i]][,39])
+          allRmax <- c(allRmax,mcmcCoda[[i]][,40])
+        }
+        
+        posteriorparams[freq,ch,1+(expt-1)*3,] <- allZ
+        posteriorparams[freq,ch,2+(expt-1)*3,] <- allp
+        posteriorparams[freq,ch,3+(expt-1)*3,] <- allRmax
+        
+        for (m in 1:4){
+          
+          tempcontrasts <- c(6,12,24,48,96)
+          if (expt==1){if (m==1){tempcontrasts <- lowmonconts}}
+          if (expt==2){if (m==1){tempcontrasts <- himonconts}}  
+          
+          if (expt==1){mm <- melt(abs(allSNRlow[,m+1,1:5,ch,tindex[freq]]))}
+          if (expt==2){mm <- melt(abs(allSNRhi[,m+1,1:5,ch,tindex[freq]]))}
+          
+          colnames(mm) <- c('s','C','y')
+          mm[,'C'] <- tempcontrasts[mm[,'C']]
+          
+          y = mm[,'y']
+          x = mm[,'C']
+          s = as.numeric(mm[,'s'])
+          w = rep(1,length(y))
+          Zvals = paramlist[,1]
+          pvals = paramlist[,2]
+          Rvals = paramlist[,3]
+          
+          # Do some checking that data make sense:
+          if ( any( !is.finite(y) ) ) { stop("All y values must be finite.") }
+          if ( any( !is.finite(x) ) ) { stop("All x values must be finite.") }
+          
+          dataList = list(x = x, y = y, s = s, w = w, Zvals = Zvals, pvals = pvals, Rvals = Rvals, Nsubj = max(s), Ntotal = length(y))
+          
+          # Get MC sample of posterior:
+          stanFit <- sampling(object=suppmodel, 
+                              data = dataList, 
+                              chains = nChains,
+                              iter = (ceiling(numSavedSteps/nChains)*thinSteps
+                                      +burnInSteps), 
+                              warmup = burnInSteps, 
+                              thin = thinSteps,
+                              cores = getOption("mc.cores", 1L))
+          # For consistency with JAGS-oriented functions in DBDA2E collection, 
+          # convert stan format to coda format:
+          mcmcCoda2 = mcmc.list(lapply( 1:ncol(stanFit), function(x){mcmc(as.array(stanFit)[,x,])}))
+          
+          allr <- NULL
+          allg <- NULL
+          for (i in 1:length(mcmcCoda)){
+            allr <- c(allr,mcmcCoda2[[i]][,26])
+            allg <- c(allg,mcmcCoda2[[i]][,27])  
+          }
+          
+          posteriorweights[freq,ch,m+(expt-1)*4,1,] <- allr
+          posteriorweights[freq,ch,m+(expt-1)*4,2,] <- allg
+          
+        }
+        
+        currentch <- ch
+        currentexpt <- expt
+        currentfreq <- freq
+        save(file='temp/modelweights.RData',list=c('posteriorparams','posteriorweights','currentch','currentexpt','currentfreq'))
+        
+      }
+      currentch <- 1
     }
-  }  
-  " # close quote for modelString
-  
-  # Write out modelString to a text file
-  writeLines( modelString , con="TEMPmodel.txt" )
-  #-----------------------------------------------------------------------------
-  # INTIALIZE THE CHAINS.
-  
-  # Use lm() to find reasonable coefficients overall, then start all individual
-  # units and overall at those values.
-  # N.B. THIS DOES NOT ALWAYS WORK AND DOES NOT ALWAYS IMPROVE THE MCMC SAMPLE.
-  # IF IT'S A PROBLEM, COMMENT OUT THE inits ARGUMENT IN THE run.jags COMMAND.
-  rinit = 1
-  ginit = 1
-  sigmaInit = 1
-  nuInit = 10 # arbitrary
-  initsList = list(
-    sigma=sigmaInit  ,
-    nu=nuInit ,
-    rmu=rinit ,
-    gmu=ginit ,
-    r=rep(rinit,max(s)) ,
-    g=rep(ginit,max(s))  # other params filled in by JAGS
-  )
-  
-  #-----------------------------------------------------------------------------
-  # RUN THE CHAINS
-  parameters = c( "r" ,  "g" ,
-                  "rmu" , "gmu" ,
-                  "sigma" , "nu")
-  adaptSteps = 1000  # Number of steps to "tune" the samplers
-  burnInSteps = 2000 
-  nChains = 3 
-  
-  # Translate to C++ and compile to DSO:
-  stanDso <- stan_model( model_code=modelString ) 
-  # Get MC sample of posterior:
-  stanFit <- sampling( object=stanDso , 
-                       data = dataList , 
-                       #pars = parameters , # optional
-                       #init = initsList , # optional  
-                       chains = nChains ,
-                       iter = ( ceiling(numSavedSteps/nChains)*thinSteps
-                                +burnInSteps ) , 
-                       warmup = burnInSteps , 
-                       thin = thinSteps,
-                       cores = getOption("mc.cores", 1L))
-  # For consistency with JAGS-oriented functions in DBDA2E collection, 
-  # convert stan format to coda format:
-  codaSamples = mcmc.list( lapply( 1:ncol(stanFit) , 
-                                   function(x) { mcmc(as.array(stanFit)[,x,]) } ) )
-  # resulting codaSamples object has these indices: 
-  #   codaSamples[[ chainIdx ]][ stepIdx , paramIdx ]
-  if ( !is.null(saveName) ) {
-    save( codaSamples , file=paste(saveName,"Mcmc.Rdata",sep="") )
-    save( stanFit , file=paste(saveName,"StanFit.Rdata",sep="") )
-    save( stanDso , file=paste(saveName,"StanDso.Rdata",sep="") )
-  }  
-  
-  return( codaSamples )
-}
-
-
-posteriorweights <- array(0,dim=c(2,64,8,2,nchains))
-posteriorparams <- array(0,dim=c(2,64,6,nchains))
-
-currentch <- 1
-currentexpt <- 1
-currentfreq <- 1
-if (file.exists('temp/modelweights.RData')==1){load('temp/modelweights.RData')}
-
-for (freq in currentfreq:2){
-for (expt in currentexpt:2){
-for (ch in currentch:64){
-save(file=paste('temp/progressfileF',freq,'E',expt,'Ch',ch,'.Rdata',sep=''),list='ch')
-  
-tempcontrasts <- c(0,6,12,24,48,96)
-if (expt==1){bl <- melt(abs(allSNRlow[,1,1:6,ch,tindex[freq]]))}
-if (expt==2){bl <- melt(abs(allSNRhi[,1,1:6,ch,tindex[freq]]))}
-colnames(bl) <- c('s','C','y')
-bl[,'C'] <- tempcontrasts[bl[,'C']]
-
-mcmcCoda <- genMCMC(bl,xName='C',yName='y',sName='s',numSavedSteps=nchains)
-
-paramlist <- matrix(0,nrow=12,ncol=3)
-for (s in 1:12){
-  allZ <- NULL
-  allp <- NULL
-  allRmax <- NULL
-  for (i in 1:length(mcmcCoda)){
-  allZ <- c(allZ,mcmcCoda[[i]][,s])
-  allp <- c(allp,mcmcCoda[[i]][,s+12])
-  allRmax <- c(allRmax,mcmcCoda[[i]][,s+24])
+    currentexpt <- 1
   }
-  paramlist[s,] <- c(mean(allZ),mean(allp),mean(allRmax))
-}
-
-  allZ <- NULL
-  allp <- NULL
-  allRmax <- NULL
-  for (i in 1:length(mcmcCoda)){
-  allZ <- c(allZ,mcmcCoda[[i]][,38])
-  allp <- c(allp,mcmcCoda[[i]][,39])
-  allRmax <- c(allRmax,mcmcCoda[[i]][,40])
-  }
-
-    posteriorparams[freq,ch,1+(expt-1)*3,] <- allZ
-    posteriorparams[freq,ch,2+(expt-1)*3,] <- allp
-    posteriorparams[freq,ch,3+(expt-1)*3,] <- allRmax
-
-for (m in 1:4){
   
-tempcontrasts <- c(6,12,24,48,96)
-if (expt==1){if (m==1){tempcontrasts <- lowmonconts}}
-if (expt==2){if (m==1){tempcontrasts <- himonconts}}  
-    
-if (expt==1){mm <- melt(abs(allSNRlow[,m+1,1:5,ch,tindex[freq]]))}
-if (expt==2){mm <- melt(abs(allSNRhi[,m+1,1:5,ch,tindex[freq]]))}
-   
-colnames(mm) <- c('s','C','y')
-mm[,'C'] <- tempcontrasts[mm[,'C']]
-
-mcmcCoda2 <- genMCMC2(mm,xName='C',yName='y',sName='s',fixedparams=paramlist,numSavedSteps=nchains)
-
-  allr <- NULL
-  allg <- NULL
-  for (i in 1:length(mcmcCoda)){
-  allr <- c(allr,mcmcCoda2[[i]][,26])
-  allg <- c(allg,mcmcCoda2[[i]][,27])  
-  }
-
-  posteriorweights[freq,ch,m+(expt-1)*4,1,] <- allr
-  posteriorweights[freq,ch,m+(expt-1)*4,2,] <- allg
-
-}
-
-currentch <- ch
-currentexpt <- expt
-currentfreq <- freq
-save(file='temp/modelweights.RData',list=c('posteriorparams','posteriorweights','currentch','currentexpt','currentfreq'))
-
-}
-currentch <- 1
-}
-currentexpt <- 1
-}
-
 }
 
 load('temp/modelweights.RData')
@@ -1431,7 +1213,7 @@ To quantify how suppression varied across the scalp, and across different mask t
 # create Figure 4 & 6
 if (runcode==1){
   
-nchains <- 12000  
+numSavedSteps <- 12000  
 meanparams <- apply(posteriorparams,1:3,mean)  
 meanweights <- apply(posteriorweights,1:4,mean)
 
@@ -1473,7 +1255,7 @@ finecontsC[1] <- 0
   title(main=titletext[1])
 
 for (i in 1:100){
-  index <- sample(1:nchains,1)
+  index <- sample(1:numSavedSteps,1)
 resp <- 1 + posteriorparams[freq,31,3+(expt-1)*3,index]*(finecontsC^posteriorparams[freq,31,2+(expt-1)*3,index])/(posteriorparams[freq,31,1+(expt-1)*3,index] + finecontsC^2)
 lines(finecontsdB,resp,lwd=1,col=addalpha(colourlist[1],0.1))
 }
@@ -1509,7 +1291,7 @@ for (m in 1:4){
 title(main=titletext[m+1])
 
 for (i in 1:100){
-  index <- sample(1:nchains,1)
+  index <- sample(1:numSavedSteps,1)
 resp <- 1 + (meanparams[freq,31,3+(expt-1)*3]/posteriorweights[freq,31,m+(expt-1)*4,1,index])*(finecontsC^meanparams[freq,31,2+(expt-1)*3])/(posteriorweights[freq,31,m+(expt-1)*4,2,index]*meanparams[freq,31,1+(expt-1)*3] + finecontsC^2)
 lines(finecontsdB,resp,lwd=1,col=addalpha(colourlist[m+1],0.1))
 }
