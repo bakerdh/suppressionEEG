@@ -17,8 +17,8 @@ csl: elife.csl
 
 ```{r setup, include=FALSE}
 
-runcode <- 1  # this flag chooses whether to run the underlying analysis code (1), or just load in the figures from the last time this was run (0)
-processraw <- 1  # this flag determines whether the raw data are downloaded from OSF and processed - this will require ~30GB of hard drive space and take several hours
+runcode <- 0  # this flag chooses whether to run the underlying analysis code (1), or just load in the figures from the last time this was run (0)
+processraw <- 0  # this flag determines whether the raw data are downloaded from OSF and processed - this will require ~30GB of hard drive space and take several hours
 runmodels <- 0 # this flag sets whether to run the Stan models - there are 2 * 2 * 64 * 5 = 1280 separate models, so they take ~8 hours to run
 
 # to fix the table orientation, add:
@@ -49,10 +49,11 @@ lowmonconts <- c(6,12,24,48,88)  # slight fiddle for the monocular mask conditio
 himonconts <- c(6,12,24,48,68)   #highest target contrast was slightly reduced to avoid clipping
 lowmoncontsdB <- 20*log10(lowmonconts)
 himoncontsdB <- 20*log10(himonconts)
-hdata <- read.csv('temp/headerfileLow.csv',header=TRUE)
-legaltriggers <- hdata$Trigger[!is.na(hdata$Trigger)]
 specfreqs <- (0:199)/duration
 hdirange <- 0.95
+
+# check if a directory exists to store data files (ignored by git)
+if (!dir.exists('temp/')){dir.create('temp/')}
 
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -102,6 +103,18 @@ colour.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nt
     fid <- which(basefiles$name=='MAtable.csv')
     osf_download(basefiles[fid,], path='temp/', progress=TRUE)
   }
+
+if (!file.exists('temp/headerfileLow.csv')){
+    osfproject <- osf_retrieve_node("e62wu")
+    componentlist <- osf_ls_nodes(osfproject)
+    EEGID <- match('Raw EEG data (low contrast mask)',as.character(unlist(componentlist[,1])))
+    EEGtoken <- componentlist[EEGID,2]
+    EEGfiles <- osf_ls_files(EEGtoken,n_max=300)
+      fid <- which(EEGfiles$name=='headerfileLow.csv')
+      osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
+}
+hdata <- read.csv('temp/headerfileLow.csv',header=TRUE)
+legaltriggers <- hdata$Trigger[!is.na(hdata$Trigger)]
 
 ```
 
@@ -699,7 +712,6 @@ knitr::include_graphics('figures/metaanalysis.pdf')
 # load in data and calculate SNRs
 if (runcode==1){
   if (processraw==1){
-    if (!dir.exists('temp/')){dir.create('temp/')}
     
     osfproject <- osf_retrieve_node("e62wu")
     componentlist <- osf_ls_nodes(osfproject)
@@ -707,10 +719,6 @@ if (runcode==1){
     EEGID <- match('Raw EEG data (low contrast mask)',as.character(unlist(componentlist[,1])))
     EEGtoken <- componentlist[EEGID,2]
     EEGfiles <- osf_ls_files(EEGtoken,n_max=300)
-    if (!file.exists('temp/headerfileLow.csv')){
-      fid <- which(EEGfiles$name=='headerfileLow.csv')
-      osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
-    }
     for (s in 1:12){
       if (!dir.exists(paste0('temp/S',s,'low/'))){
         fid <- which(EEGfiles$name==paste0('S',s,'low.zip'))
@@ -723,10 +731,6 @@ if (runcode==1){
     EEGID <- match('Raw EEG data (high contrast mask)',as.character(unlist(componentlist[,1])))
     EEGtoken <- componentlist[EEGID,2]
     EEGfiles <- osf_ls_files(EEGtoken,n_max=300)
-    if (!file.exists('temp/headerfileHi.csv')){
-      fid <- which(EEGfiles$name=='headerfileHi.csv')
-      osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
-    }
     for (s in 1:12){
       if (!dir.exists(paste0('temp/S',s,'high/'))){
         fid <- which(EEGfiles$name==paste0('S',s,'high.zip'))
@@ -735,8 +739,6 @@ if (runcode==1){
         file.remove(paste0('temp/S',s,'high.zip'))
       }
     }
-        
-    
     
     # the code here does the primary SSVEP analysis from the raw data. This takes a long time (around 2 hours), and the results are saved in the RData file for faster loading
     tic()
