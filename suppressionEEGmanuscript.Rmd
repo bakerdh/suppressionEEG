@@ -17,8 +17,8 @@ csl: elife.csl
 
 ```{r setup, include=FALSE}
 
-runcode <- 0  # this flag chooses whether to run the underlying analysis code (1), or just load in the figures from the last time this was run (0)
-processraw <- 0  # this flag determines whether the raw data are downloaded from OSF and processed - this will require ~30GB of hard drive space and take several hours
+runcode <- 1  # this flag chooses whether to run the underlying analysis code (1), or just load in the figures from the last time this was run (0)
+processraw <- 1  # this flag determines whether the raw data are downloaded from OSF and processed - this will require ~30GB of hard drive space and take several hours
 runmodels <- 0 # this flag sets whether to run the Stan models - there are 2 * 2 * 64 * 5 = 1280 separate models, so they take ~8 hours to run
 
 # to fix the table orientation, add:
@@ -26,11 +26,13 @@ runmodels <- 0 # this flag sets whether to run the Stan models - there are 2 * 2
 # then change \begin{table} to \begin{sidewaystable} (and same for \end)
 
 # reasonably compact code to check which packages are installed, install the missing ones, and activate all
-packagelist <- c('knitr','neldermead','tictoc','grImport','tiff','pals','bmp','rstan','coda','reshape2','MASS','bayestestR')
+packagelist <- c('knitr','neldermead','tictoc','grImport','tiff','pals','bmp','rstan','coda','reshape2','MASS','bayestestR','remotes','utils')
 missingpackages <- packagelist[!packagelist %in% installed.packages()[,1]]
 if (length(missingpackages)>0){install.packages(missingpackages)}
 toinstall <- packagelist[which(!packagelist %in% (.packages()))]
 invisible(lapply(toinstall,library,character.only=TRUE))
+if (!'osfr' %in% installed.packages()[,1]){remotes::install_github("centerforopenscience/osfr")}
+library(osfr)
 
 addalpha <- function(col, alpha=1){apply(sapply(col, col2rgb)/255, 2, function(x) rgb(x[1], x[2], x[3], alpha=alpha))}
 alphalev <- 0.2
@@ -87,6 +89,19 @@ colour.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nt
     rect(0,y,10,y+1/scale, col=lut[i], border=NA)
   }	
 }
+
+  if (!file.exists('temp/MAdata.csv')){
+    osfproject <- osf_retrieve_node("e62wu")
+    basefiles <- osf_ls_files(osfproject)
+    fid <- which(basefiles$name=='MAdata.csv')
+    osf_download(basefiles[fid,], path='temp/', progress=TRUE)
+  }
+  if (!file.exists('temp/MAtable.csv')){
+    osfproject <- osf_retrieve_node("e62wu")
+    basefiles <- osf_ls_files(osfproject)
+    fid <- which(basefiles$name=='MAtable.csv')
+    osf_download(basefiles[fid,], path='temp/', progress=TRUE)
+  }
 
 ```
 
@@ -424,7 +439,7 @@ We modelled the data using a two-stage Bayesian hierarchical model similar to th
 
 ## Data and script availability
 
-All data and scripts are publicly available at: [https://osf.io/e62wu/](https://osf.io/e62wu/)
+All data and scripts are publicly available at: [https://dx.doi.org/10.17605/OSF.IO/E62WU](https://osf.io/e62wu/)
 
 # Results
 
@@ -684,17 +699,56 @@ knitr::include_graphics('figures/metaanalysis.pdf')
 # load in data and calculate SNRs
 if (runcode==1){
   if (processraw==1){
+    if (!dir.exists('temp/')){dir.create('temp/')}
+    
+    osfproject <- osf_retrieve_node("e62wu")
+    componentlist <- osf_ls_nodes(osfproject)
+    
+    EEGID <- match('Raw EEG data (low contrast mask)',as.character(unlist(componentlist[,1])))
+    EEGtoken <- componentlist[EEGID,2]
+    EEGfiles <- osf_ls_files(EEGtoken,n_max=300)
+    if (!file.exists('temp/headerfileLow.csv')){
+      fid <- which(EEGfiles$name=='headerfileLow.csv')
+      osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
+    }
+    for (s in 1:12){
+      if (!dir.exists(paste0('temp/S',s,'low/'))){
+        fid <- which(EEGfiles$name==paste0('S',s,'low.zip'))
+        osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
+        unzip(paste0('temp/S',s,'low.zip'),exdir=paste0('temp/S',s,'low/'))
+        file.remove(paste0('temp/S',s,'low.zip'))
+      }
+    }
+    
+    EEGID <- match('Raw EEG data (high contrast mask)',as.character(unlist(componentlist[,1])))
+    EEGtoken <- componentlist[EEGID,2]
+    EEGfiles <- osf_ls_files(EEGtoken,n_max=300)
+    if (!file.exists('temp/headerfileHi.csv')){
+      fid <- which(EEGfiles$name=='headerfileHi.csv')
+      osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
+    }
+    for (s in 1:12){
+      if (!dir.exists(paste0('temp/S',s,'high/'))){
+        fid <- which(EEGfiles$name==paste0('S',s,'high.zip'))
+        osf_download(EEGfiles[fid,], path='temp/', progress=TRUE)
+        unzip(paste0('temp/S',s,'high.zip'),exdir=paste0('temp/S',s,'high/'))
+        file.remove(paste0('temp/S',s,'high.zip'))
+      }
+    }
+        
+    
+    
     # the code here does the primary SSVEP analysis from the raw data. This takes a long time (around 2 hours), and the results are saved in the RData file for faster loading
     tic()
     
     allspeclow <- array(0,dim = c(12,5,9,64,duration*20))
     for (s in 1:12){
-      d <- dir(path=paste('~/Desktop/SurroundEEG/S',s,'low/',sep=''),pattern='*.csv.gz')
+      d <- dir(path=paste('temp/S',s,'low/',sep=''),pattern='*.csv.gz')
       
       allspec <- array(0,dim = c(6,5,9,64,duration*20))
       condcounter <- matrix(0,nrow=5,ncol=9)
       for (block in 1:length(d)){
-        EEGdata <- read.csv(paste('~/Desktop/SurroundEEG/S',s,'low/',d[block],sep=''),header=TRUE)
+        EEGdata <- read.csv(paste('temp/S',s,'low/',d[block],sep=''),header=TRUE)
         
         electrodes <- colnames(EEGdata)
         
@@ -724,12 +778,12 @@ if (runcode==1){
     
     allspechi <- array(0,dim = c(12,5,9,64,duration*20))
     for (s in 1:12){
-      d <- dir(path=paste('~/Desktop/SurroundEEG/S',s,'high/',sep=''),pattern='*.csv.gz')
+      d <- dir(path=paste('temp/S',s,'high/',sep=''),pattern='*.csv.gz')
       
       allspec <- array(0,dim = c(6,5,9,64,duration*20))
       condcounter <- matrix(0,nrow=5,ncol=9)
       for (block in 1:length(d)){
-        EEGdata <- read.csv(paste('~/Desktop/SurroundEEG/S',s,'high/',d[block],sep=''),header=TRUE)
+        EEGdata <- read.csv(paste('temp/S',s,'high/',d[block],sep=''),header=TRUE)
         
         electrodes <- colnames(EEGdata)
         
@@ -760,6 +814,13 @@ if (runcode==1){
     save(list=c('allspeclow','allspechi','electrodes'),file='temp/SSVEPdata.RData')
     
     toc()  
+  }
+  
+  if (!file.exists('temp/SSVEPdata.RData')){
+    osfproject <- osf_retrieve_node("e62wu")
+    basefiles <- osf_ls_files(osfproject)
+    fid <- which(basefiles$name=='SSVEPdata.RData')
+    osf_download(basefiles[fid,], path='temp/', progress=TRUE)
   }
   
   load('temp/SSVEPdata.RData')
@@ -941,6 +1002,12 @@ if (runmodels==1){
   
 }
 
+  if (!file.exists('temp/modelweights.RData')){
+    osfproject <- osf_retrieve_node("e62wu")
+    basefiles <- osf_ls_files(osfproject)
+    fid <- which(basefiles$name=='modelweights.RData')
+    osf_download(basefiles[fid,], path='temp/', progress=TRUE)
+  }
 load('temp/modelweights.RData')
 
 ```
