@@ -115,6 +115,7 @@ if (!file.exists('temp/headerfileLow.csv')){
 }
 hdata <- read.csv('temp/headerfileLow.csv',header=TRUE)
 legaltriggers <- hdata$Trigger[!is.na(hdata$Trigger)]
+samplerate <- 1000
 
 ```
 
