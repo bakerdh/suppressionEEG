@@ -6,7 +6,6 @@
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
-\usepackage{rotating}
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
@@ -30,7 +29,7 @@
 }
 \usepackage{hyperref}
 \hypersetup{
-            pdftitle={Electrophysiological measures of visual suppression},
+            pdftitle={Steady-state measures of visual suppression},
             pdfauthor={Daniel H. Baker, Greta Vilidaite \& Alex R. Wade},
             pdfborder={0 0 0},
             breaklinks=true}
@@ -68,18 +67,17 @@
 \makeatother
 
 
-\title{Electrophysiological measures of visual suppression}
+\title{Steady-state measures of visual suppression}
 \author{Daniel H. Baker, Greta Vilidaite \& Alex R. Wade}
-\date{2021-07-02}
+\date{2021-09-13}
 
 \begin{document}
 \maketitle
 
-
 \hypertarget{abstract}{%
 \section{Abstract}\label{abstract}}
 
-In the early visual system, suppression occurs between neurons representing different stimuli. This includes features such as orientation (cross-orientation suppression), eye-of-origin (interocular suppression) and spatial location (surround suppression), which are thought to involve distinct anatomical pathways. We asked if these separate routes to suppression can be differentiated by their pattern of gain control on the contrast response function measured in human participants using steady-state electroencephalography. Changes in contrast gain shift the contrast response function laterally, whereas changes in response gain scale the function vertically. We used a Bayesian hierarchical model to summarise the evidence for each type of gain control. A computational meta-analysis of 16 previous studies found the most evidence for contrast gain effects with overlaid masks, but no clear evidence favouring either response gain or contrast gain for other mask types. We then conducted two new experiments, comparing suppression from four mask types (monocular and dichoptic overlay masks, and aligned and orthogonal surround masks) on responses to sine wave grating patches flickering at 5Hz. At the occipital pole, there was strong evidence for contrast gain effects in all four mask types at the first harmonic frequency (5Hz). Suppression generally became stronger at more lateral electrode sites, but there was little evidence of response gain effects. At the second harmonic frequency (10Hz) suppression was stronger overall, and involved both contrast and response gain effects. Although suppression from different mask types involves distinct anatomical pathways, gain control processes appear to serve a common purpose, which we suggest might be to suppress less reliable inputs.
+In the early visual system, suppression occurs between neurons representing different stimulus properties. This includes features such as orientation (cross-orientation suppression), eye-of-origin (interocular suppression) and spatial location (surround suppression), which are thought to involve distinct anatomical pathways. We asked if these separate routes to suppression can be differentiated by their pattern of gain control on the contrast response function measured in human participants using steady-state electroencephalography. Changes in contrast gain shift the contrast response function laterally, whereas changes in response gain scale the function vertically. We used a Bayesian hierarchical model to summarise the evidence for each type of gain control. A computational meta-analysis of 16 previous studies found the most evidence for contrast gain effects with overlaid masks, but no clear evidence favouring either response gain or contrast gain for other mask types. We then conducted two new experiments, comparing suppression from four mask types (monocular and dichoptic overlay masks, and aligned and orthogonal surround masks) on responses to sine wave grating patches flickering at 5Hz. At the occipital pole, there was strong evidence for contrast gain effects in all four mask types at the first harmonic frequency (5Hz). Suppression generally became stronger at more lateral electrode sites, but there was little evidence of response gain effects. At the second harmonic frequency (10Hz) suppression was stronger overall, and involved both contrast and response gain effects. Although suppression from different mask types involves distinct anatomical pathways, gain control processes appear to serve a common purpose, which we suggest might be to suppress less reliable inputs.
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -97,7 +95,7 @@ Several studies have demonstrated that these different types of suppression have
 \caption{Example stimuli and illustration of contrast response functions. Panel (a) shows five stimulus arrangements, illustrating how a vertical target pattern can be combined with four different mask types. Panel (b) shows three varieties of contrast response function, that either continue to accelerate (solid line), saturate (dashed line) or super-saturate (dotted line) across the range of displayable stimulus contrasts. Panel (c) illustrates a contrast gain (dashed line) and a response gain (dotted line) shift, relative to a baseline response (solid line).}\label{fig:stimfig}
 \end{figure}
 
-An important distinction concerns whether a suppressive effect modulates the contrast gain or the response gain of a neuron (or neural population). Changes in contrast gain shift the stimulus-response curve (the contrast response function) laterally, whereas changes in response gain scale the function vertically (see examples in Figure \ref{fig:stimfig}c). These different patterns may be indicative of specific neurophysiological underpinnings for an effect, and potentially different processes might occur at successive stages of processing. Sengpiel et al. (1998) showed that in V1, dichoptic and surround masks primarily affected response gain, whereas overlaid masks affected contrast gain. Other studies have found that spatial attention modulates response gain (Itthipuripat et al., 2019), whereas suppression from overlaid masks is more consistent with contrast gain (Tsai et al., 2012). Spatial adaptation appears to affect both contrast and response gain in primary visual cortex (Albrecht et al., 1984), whereas motion adaptation is mostly attributable to contrast gain in area MT (Kohn and Movshon, 2003). In addition, there is evidence that suppression builds up at successive stages of cortical processing, beyond primary visual cortex, and is stronger at later levels in the visual hierarchy (Zenger-Landolt and Heeger, 2003). This is especially likely for surround suppression, which might be mediated by higher-level neurons with large receptive fields.
+An important distinction concerns whether a suppressive effect modulates the contrast gain or the response gain of a neuron (or neural population). Changes in contrast gain shift the stimulus-response curve (the contrast response function) laterally, whereas changes in response gain scale the function vertically (see examples in Figure \ref{fig:stimfig}c). These different patterns may be indicative of specific neurophysiological underpinnings for an effect, and potentially different processes might occur at successive stages of processing. Sengpiel et al. (1998) showed that in V1, dichoptic and surround masks primarily affected response gain, whereas overlaid masks affected contrast gain. Other studies have found that spatial attention modulates response gain (Itthipuripat et al., 2019), whereas suppression from overlaid masks is more consistent with contrast gain (Tsai et al., 2012). Spatial adaptation appears to affect both contrast and response gain in primary visual cortex (Albrecht et al., 1984), whereas motion adaptation is mostly attributable to contrast gain in area MT (Kohn and Movshon, 2003). Work by Hou et al. (2020) used source-imaged EEG to study interocular suppression, and found evidence of a transition from contrast gain effects in V1 to response gain effects in extra-striate areas. In addition, there is evidence that suppression builds up at successive stages of cortical processing beyond primary visual cortex, and is stronger at later levels in the visual hierarchy (Zenger-Landolt and Heeger, 2003). This is especially likely for surround suppression, which might be mediated by higher-level neurons with large receptive fields.
 
 Neural responses can be measured non-invasively using steady-state visual evoked potentials (SSVEPs; Norcia et al., 2015) typically recorded in humans using either electroencephalography (EEG) or magnetoencephalography (MEG). By flickering the target stimulus at a fixed frequency, entrained neural oscillations are evoked at the flicker frequency, and also its higher harmonics (integer multiples of the flicker rate). Previous studies have shown that contrast-response functions measured using SSVEP are strongly modulated by overlaid masks (Baker and Vilidaitė, 2014; Busse et al., 2009; Tsai et al., 2012), dichoptic masks (Baker and Wade, 2017; Chadnova et al., 2018), and surround masks (Benjamin et al., 2018; Vanegas et al., 2015; Xiao and Wade, 2010).
 
@@ -117,7 +115,7 @@ Studies were included if they reported steady-state contrast response functions 
 \hypertarget{analysis-and-modelling}{%
 \subsubsection{Analysis and modelling}\label{analysis-and-modelling}}
 
-Contrast response function data were extracted using a computer program (WebPlotDigitizer, Rohatgi, 2020) from the figures in each paper. Where necessary, these were converted to signal-to-noise ratios by dividing by the response to a blank screen, or at adjacent frequency bins to the target, or to the lowest target contrast condition. In some cases, results were averaged across different temporal frequency conditions to provide a single data set for each study.
+Contrast response function data were extracted using a computer program (WebPlotDigitizer, Rohatgi, 2020) from the figures in each paper. Where necessary, these were converted to signal-to-noise ratios by dividing by the response to a blank screen, or at adjacent frequency bins to the target, or to the lowest target contrast condition. In one case (Candy et al., 2001), results were averaged across different temporal frequency conditions to provide a single data set for the study, but we confirmed that this did not affect our conclusions by repeating the analysis for each temporal frequency separately.
 
 Our primary objective was to understand the relative contributions of contrast gain and response gain to suppression from different mask types. We quantified this using a two-stage modelling approach. At the first stage, we fitted a standard gain control model (Heeger, 1992) with three free parameters to the baseline data using a downhill simplex algorithm. The model is defined as:
 
@@ -126,7 +124,7 @@ Our primary objective was to understand the relative contributions of contrast g
 resp = R_{max}\frac{C^p}{Z + C^2} + 1,
 \end{equation}
 
-where \emph{C} is the target contrast. The \(Z\) parameter sets the horizontal position of the response curve, \(p\) governs the function shape (see Figure \ref{fig:stimfig}b) from accelerating (\emph{p} \textgreater{} 2) to saturating (\emph{p} = 2) to super-saturating (\emph{p} \textless{} 2), and \(R_{max}\) scales the overall height of the function. The additive constant (+1) represents additive noise, and converts the model response to a signal-to-noise ratio (implicitly, we also divide \emph{resp} by 1, but this is omitted as it has no effect). We fitted the model independently to each study's baseline data by minimising the root-mean-squared error between model and data.
+\noindent where \emph{C} is the target contrast. The \(Z\) parameter sets the horizontal position of the response curve, \(p\) governs the function shape (see Figure \ref{fig:stimfig}b) from accelerating (\emph{p} \textgreater{} 2) to saturating (\emph{p} = 2) to super-saturating (\emph{p} \textless{} 2), and \(R_{max}\) scales the overall height of the function. The additive constant (+1) represents additive noise, and converts the model response to a signal-to-noise ratio (implicitly, we also divide \emph{resp} by 1, but this is omitted as it has no effect). We fitted the model independently to each study's baseline data by minimising the root-mean-squared error between model and data.
 
 The second stage of fitting used the parameter estimates from the first stage, and fitted the responses in the presence of a mask using the equation:
 
@@ -135,7 +133,9 @@ The second stage of fitting used the parameter estimates from the first stage, a
 resp = \frac{R_{max}}{r} \times \frac{C^p}{gZ + C^2} + 1,
 \end{equation}
 
-where the new terms \emph{r} and \emph{g} are free parameters that govern the extent of response gain and contrast gain, respectively. Values of \emph{r}, \emph{g} \textgreater{} 1 indicate suppression, though in principle masks can also cause facilitation (\emph{r}, \emph{g} \textless{} 1). We estimated values of these parameters jointly using the data from all studies (separately for each mask type) in a hierarchical Bayesian model. We defined broad hyperpriors for \emph{g} and \emph{r} as gamma distributions, with parameters \(\alpha\) = 1.5, \(\beta\) = 0.5. These functions peak at \(\frac{\alpha-1}{\beta}\) = 1, so the prior expectation before observing any data is that there is no suppression of either kind. The priors had greater probability mass at values \textgreater{} 1, reflecting our expectation that one or both parameters would produce suppression, but also extended below 1, ensuring that the model was capable of capturing facilitation where it appeared in the data. Both parameters were constrained to have positive values. Bayesian modelling was implemented in \emph{Stan} (Carpenter et al., 2017), based on an example script for hierarchical nonlinear regression accompanying Chapter 17 of Kruschke (2014). We examined how the posterior distribution of each parameter varied with mask type, both for individual studies, and across the whole sample.
+\noindent where the new terms \emph{r} and \emph{g} are free parameters that govern the extent of response gain and contrast gain, respectively. Values of \emph{r}, \emph{g} \textgreater{} 1 indicate suppression, though in principle masks can also cause facilitation (\emph{r}, \emph{g} \textless{} 1). Note that even with the value of \emph{p} fixed by the first stage of modelling, the \emph{r} and \emph{g} parameters can accommodate apparent changes in the steepness of the contrast response function and the extent of saturation, by moving the steepest part of the curve to higher contrasts (\emph{g}), or by reducing the available range of responses (\emph{r}). Our rationale for fitting the baseline data first is that the values of the \emph{p}, \emph{Z} and \(R_{max}\) parameters are then fixed, and cannot trade off with the suppression-specific parameters (\emph{r} and \emph{g}) when fitting the masking data. This gives a cleaner estimate of the relative effects of each type of suppression.
+
+We estimated values of the suppression parameters jointly using the data from all studies (separately for each mask type) in a hierarchical Bayesian model. We defined broad hyperpriors for \emph{g} and \emph{r} as gamma distributions, with parameters \(\alpha\) = 1.5, \(\beta\) = 0.5. These functions peak at \(\frac{\alpha-1}{\beta}\) = 1, so the modal assumption before observing any data is that there is no suppression of either kind. The priors had greater probability mass at values \textgreater{} 1, reflecting our expectation that one or both parameters would produce suppression, but also extended below 1, ensuring that the model was capable of capturing facilitation where it appeared in the data. Both parameters were constrained to have positive values. Bayesian modelling was implemented in \emph{Stan} (Carpenter et al., 2017), based on an example script for hierarchical nonlinear regression accompanying Chapter 17 of Kruschke (2014). We examined how the posterior distribution of each parameter varied with mask type, both for individual studies, and across the whole sample.
 
 \hypertarget{eeg-experiments}{%
 \subsection{EEG experiments}\label{eeg-experiments}}
@@ -164,7 +164,7 @@ After providing consent, participants were set up with an EEG cap of appropriate
 \hypertarget{data-analysis-and-modelling}{%
 \subsubsection{Data analysis and modelling}\label{data-analysis-and-modelling}}
 
-All data were converted from the native ANT-EEProbe format to a compressed comma-separated value (csv) text file using a custom \emph{Matlab} script and components of the EEGlab toolbox (Delorme and Makeig, 2004). The data for each participant were then loaded into \emph{R} for analysis. A ten-second waveform for each trial at each electrode was extracted, omitting the first one second after stimulus onset to avoid transients. The fast Fourier transform was calculated for each waveform, and the spectrum stored in a matrix. All repetitions of each condition were then coherently averaged (i.e.~taking both the phase and amplitude into account), before being converted to a signal-to-noise ratio by dividing the amplitude at each frequency by the mean amplitude of the neighbouring 10 bins (\(\pm0.5\) Hz in steps of 0.1 Hz). The signal-to-noise ratio at the target flicker frequency (5 Hz) and its second harmonic (10 Hz) were then used as dependent variables for further analysis.
+All data were converted from the native ANT-EEProbe format to a compressed comma-separated value (csv) text file using a custom \emph{Matlab} script and components of the EEGlab toolbox (Delorme and Makeig, 2004). The data for each participant were then loaded into \emph{R} for analysis. A ten-second waveform for each trial at each electrode was extracted, omitting the first one second after stimulus onset to avoid transients. The fast Fourier transform was calculated for each waveform, and the spectrum stored in a matrix. All repetitions of each condition were then coherently averaged (i.e.~averaging the full complex Fourier spectrum, including both phase and amplitude components), before being converted to a signal-to-noise ratio by dividing the amplitude at each frequency by the mean amplitude of the neighbouring 10 bins (\(\pm0.5\) Hz in steps of 0.1 Hz). The signal-to-noise ratio at the target flicker frequency (5 Hz) and its second harmonic (10 Hz) were then used as dependent variables for further analysis.
 
 We modelled the data using a two-stage Bayesian hierarchical model similar to that described above for the computational meta-analysis. Here, participant was the unit of observation instead of study. The other main difference was that we also used a hierarchical model (instead of simplex fitting) at the first stage to fit the parameters of the baseline contrast response function (\emph{Z}, \emph{p} and \(R_{max}\)). This seemed appropriate for our novel data set, given that all participants viewed the same stimuli, whereas in the computational meta-analysis different studies had different stimulus parameters. The hyperpriors for each parameter were normal distributions with parameters: \(\mu\) = 100, \(\sigma\) = 40 (\emph{Z}); \(\mu\) = 2, \(\sigma\) = 0.25 (\emph{p}); and \(\mu\) = 5, \(\sigma\) = 2 (\(R_{max}\)). All parameters were constrained to have positive values. Again, we were most interested in the posterior distributions of the suppression parameters (\emph{r} and \emph{g}), and explored how these varied by mask type, electrode position, and response frequency.
 
@@ -181,7 +181,7 @@ All data and scripts are publicly available at: \href{https://osf.io/e62wu/}{htt
 
 We began by conducting a computational meta-analysis of 16 SSVEP studies from the literature (Baker et al., 2015; Baker and Vilidaitė, 2014; Baker and Wade, 2017; Benjamin et al., 2018; Burr and Morrone, 1987; Busse et al., 2009; Candy et al., 2001; Chadnova et al., 2018; Hou et al., 2020; Pei et al., 2017; Ross and Speed, 1991; Smith et al., 2017; Tsai et al., 2012; Vanegas et al., 2019, 2015; Zhou et al., 2015). Study-specific information is given in Table \ref{tab:metatable} and the results are shown in Figure \ref{fig:metaanalysis}. For each study, we replot the contrast response functions for the target alone (black points), and with the mask present (coloured points), along with model fits (curves). The model described the data well. The kernel density functions show posterior distributions of parameter estimates for the response gain parameter (\emph{r}, grey distributions), and the contrast gain parameter (\emph{g}, coloured distributions). For each mask type, the vertical dashed line indicates no suppression (a weight of 1). The 95\% highest density intervals are given by the horizontal bars - where these overlap 1 we lack credible evidence for that type of suppression.
 
-\begin{sidewaystable}
+\begin{table}
 
 \caption{\label{tab:metatable}Table summarising methodological details for each study in the meta analysis. N: number of participants, SI: saturation index.}
 \centering
@@ -189,42 +189,42 @@ We began by conducting a computational meta-analysis of 16 SSVEP studies from th
 \hline
 Study & Method & N & Target & TF (Hz) & Mask & Location & SI\\
 \hline
-Baker (2014) & EEG & 6 & 1 c/deg grating & 7 & Orthogonal overlay & Oz, POz & 0.22\\
+Baker (2014) Fig 3a & EEG & 6 & 1 c/deg grating & 7 & Orthogonal overlay & Oz, POz & 0.22\\
 \hline
-Burr (1987) & EEG & 1 & 2 c/deg grating & 7.8 & Orthogonal overlay & Oz & -0.44\\
+Burr (1987) Fig 4a & EEG & 1 & 2 c/deg grating & 7.8 & Orthogonal overlay & Oz & -0.44\\
 \hline
-Busse (2009) & EEG & 5 & 1 c/deg grating & 4.5 & Orthogonal overlay & V1 (source localised) & 0.09\\
+Busse (2009) Fig 6c & EEG & 5 & 1 c/deg grating & 4.5 & Orthogonal overlay & V1 (source localised) & 0.09\\
 \hline
-Candy (2001) & EEG & 8 & 1 c/deg grating & 3.3, 5.5 & Orthogonal overlay & Oz, O1, O2 & 0.31\\
+Candy (2001) Fig 3 & EEG & 8 & 1 c/deg grating & 3.3, 5.5 & Orthogonal overlay & Oz, O1, O2 & 0.31\\
 \hline
-Pei (2017) & EEG & 10 & Binary noise & 5.14 & Noise overlay & Oz & -0.03\\
+Pei (2017) Fig 4 & EEG & 10 & Binary noise & 5.14 & Noise overlay & Oz & -0.03\\
 \hline
-Ross (1991) & EEG & 1 & 2 c/deg grating & 8.8 & Orthogonal overlay & Oz & -0.04\\
+Ross (1991) Fig 1 & EEG & 1 & 2 c/deg grating & 8.8 & Orthogonal overlay & Oz & -0.04\\
 \hline
-Smith (2017) & EEG & 28 & 0.5 c/deg grating & 7 & Orthogonal overlay & Oz, POz, O1, O2 & 0.35\\
+Smith (2017) Fig 2a & EEG & 28 & 0.5 c/deg grating & 7 & Orthogonal overlay & Oz, POz, O1, O2 & 0.35\\
 \hline
-Tsai (2012) & EEG & 10 & Binary noise & 5.14 & Noise overlay & V1 (source localised) & -0.13\\
+Tsai (2012) Fig 3a & EEG & 10 & Binary noise & 5.14 & Noise overlay & V1 (source localised) & -0.13\\
 \hline
-Baker (2015) & EEG & 5 & Binary noise & 10 & Dichoptic & Oz, POz & 0.27\\
+Baker (2015) Fig 2a & EEG & 5 & Binary noise & 10 & Dichoptic & Oz, POz & 0.27\\
 \hline
-Baker (2017) & EEG & 12 & 1 c/deg grating & 5 & Dichoptic & Oz, POz & 0.04\\
+Baker (2017) Fig 4d & EEG & 12 & 1 c/deg grating & 5 & Dichoptic & Oz, POz & 0.04\\
 \hline
-Chadnova (2018) & MEG & 5 & Binary noise & 4 & Dichoptic & V1 (source localised) & 0.33\\
+Chadnova (2018) Fig 2 & MEG & 5 & Binary noise & 4 & Dichoptic & V1 (source localised) & 0.33\\
 \hline
-Hou (2020) & EEG & 15 & 2 c/deg grating & 8.5 & Dichoptic & V1 (source localised) & 0.09\\
+Hou (2020) Fig 4a & EEG & 15 & 2 c/deg grating & 8.5 & Dichoptic & V1 (source localised) & 0.09\\
 \hline
-Zhou (2015) & EEG & 12 & Binary noise & 10 & Dichoptic & Oz & 0.22\\
+Zhou (2015) Fig 2 & EEG & 12 & Binary noise & 10 & Dichoptic & Oz & 0.22\\
 \hline
-Benjamin (2018) & EEG & 13 & 2 c/deg grating & 7 & Aligned and Orthogonal Surround & Oz & -0.01\\
+Benjamin (2018) Fig 6 & EEG & 13 & 2 c/deg grating & 7 & Aligned and Orthogonal Surround & Oz & -0.01\\
 \hline
-Vanegas (2015) & EEG & 21 & 1 c/deg grating & 25 & Aligned and Orthogonal Surround & POz & 0.38\\
+Vanegas (2015) Fig 3 & EEG & 21 & 1 c/deg grating & 25 & Aligned and Orthogonal Surround & POz & 0.38\\
 \hline
-Vanegas (2019) & EEG & 11 & 1 c/deg grating & 25 & Aligned Surround & Pz, POz, Oz & 0.49\\
+Vanegas (2019) Fig 3b & EEG & 11 & 1 c/deg grating & 25 & Aligned Surround & Pz, POz, Oz & 0.49\\
 \hline
 \end{tabular}
-\end{sidewaystable}
+\end{table}
 
-For individual studies, we see credible evidence for both contrast gain (9 data sets) and response gain (4 data sets). This is most consistent for the overlay masks, which are generally well explained by contrast gain control. However, the 95\% highest density interval of the group posterior distribution for contrast gain control, shown in the final row, overlapped with 1. This indicates that we do not have credible evidence for a contrast gain effect for overlay suppression. The other three mask types had a similar outcome, as the 95\% highest density intervals of the group posterior distributions for both parameters all overlap 1. This suggests that overall the literature does not give a consistent picture of whether response gain or contrast gain is responsible for different types of suppression (though the parameter values for contrast gain are somewhat higher on average). This could be for any number of reasons, but is likely to be partly due to the methodological heterogeneity across studies (see Table \ref{tab:metatable}). To address this shortcoming, we conducted a new study in which participants viewed stimuli involving all four types of mask.
+For individual studies, we see credible evidence for both contrast gain (9 data sets) and response gain (4 data sets). This is most consistent for the overlay masks, which are generally well explained by contrast gain control. However, the 95\% highest density interval of the group posterior distribution for contrast gain control, shown in the final row, overlapped with a value of 1. This indicates that we do not have credible evidence for a contrast gain effect for overlay suppression. The other three mask types had a similar outcome, as the 95\% highest density intervals of the group posterior distributions for both parameters all overlap 1. This suggests that overall the literature does not give a consistent picture of whether response gain or contrast gain is responsible for different types of suppression (though the parameter values for contrast gain are somewhat higher on average). This could be for any number of reasons, but is likely to be partly due to the methodological heterogeneity across studies (see Table \ref{tab:metatable}). To address this shortcoming, we conducted a new study in which participants viewed stimuli involving all four types of mask.
 
 \begin{figure}
 
@@ -232,13 +232,13 @@ For individual studies, we see credible evidence for both contrast gain (9 data 
 
 }
 
-\caption{Computational meta-analysis of 16 studies from the literature reporting SSVEP measures of suppression. Each study is referred to by the first author surname - see text for full citations. Contrast response functions at baseline (black points) and with a mask present (coloured points) were fit using a two stage modelling procedure (curves). The posterior distributions (vertically rescaled for visibility) of parameter estimates for response gain (grey) and contrast gain (colours) are shown for each study and the group estimates. Vertical dashed lines indicate a parameter value of 1 (the axis extends to x = 15). Horizontal bars give the 95 percent highest density intervals for each parameter estimate.}\label{fig:metaanalysis}
+\caption{Computational meta-analysis of 16 studies from the literature reporting SSVEP measures of suppression. Each study is referred to by the first author surname - see text for full citations. Contrast response functions at baseline (black points) and with a mask present (coloured points) were fit using a two stage modelling procedure (curves). The posterior distributions (vertically rescaled for visibility) of parameter estimates for response gain (grey) and contrast gain (colours) are shown for each study and the group estimates. Vertical dashed lines indicate a parameter value of 1 (the axis extends to x = 15). Horizontal bars give the 95 percent highest density intervals for each parameter estimate. $R^2$ values in each sub-panel indicate the coefficient of determination, calculated separately for the baseline (black text) and masked data (coloured text).}\label{fig:metaanalysis}
 \end{figure}
 
 \hypertarget{suppression-is-due-to-contrast-gain-at-the-first-harmonic-for-all-mask-types}{%
 \subsection{Suppression is due to contrast gain at the first harmonic for all mask types}\label{suppression-is-due-to-contrast-gain-at-the-first-harmonic-for-all-mask-types}}
 
-In our empirical experiments, the target stimulus evoked strong steady-state responses at both the first harmonic frequency (5 Hz) and the second harmonic frequency (10 Hz). Figure \ref{fig:fftfig}a shows the averaged Fourier spectrum from the baseline (no mask) condition with 96\% target contrast. Responses at both frequencies were strongest at the occipital pole, over early visual cortex (see inset scalp plots). At most electrodes, responses increased monotonically as a function of contrast (see examples in Figure \ref{fig:fftfig}b,c). In general, responses at the first harmonic (5Hz) were more likely to accelerate, and those at the second harmonic more likely to saturate or super-saturate. The scalp plot insets to Figures \ref{fig:fftfig}b,c summarise this using a saturation index proposed by Ledgeway et al. (2005). It is calculated by taking the difference between the responses at the highest two contrasts (96\% and 48\%), and dividing by the maximum response. Values of SI \textgreater{} 1 correspond to acceleration (plotted violet), SI = 1 to saturation (white), and SI \textless{} 1 to super-saturation (green). Notice that overall the first harmonic responses accelerate (median SI = 0.10), but that many of the second harmonic responses saturate or super-saturate (median SI = 0.01).
+In our empirical experiments, the target stimulus evoked strong steady-state responses at both the first harmonic frequency (5 Hz) and the second harmonic frequency (10 Hz). Figure \ref{fig:fftfig}a shows the averaged Fourier spectrum from the baseline (no mask) condition with 96\% target contrast. Responses at both frequencies were strongest at the occipital pole, over early visual cortex (see inset scalp plots). At most electrodes, responses increased monotonically as a function of contrast (see examples in Figure \ref{fig:fftfig}b,c). In general, responses at the first harmonic (5Hz) were more likely to accelerate, and those at the second harmonic more likely to saturate or super-saturate. The scalp plot insets to Figures \ref{fig:fftfig}b,c summarise this using a saturation index proposed by Ledgeway et al. (2005). It is calculated by taking the difference between the responses at the highest two contrasts (96\% and 48\%), and dividing by the maximum response. Positive values of SI correspond to acceleration (plotted violet), SI = 0 to saturation (white), and negative SI values to super-saturation (green). Notice that overall the first harmonic responses accelerate (median SI = 0.10), but that many of the second harmonic responses saturate or super-saturate (median SI = 0.01).
 
 \begin{figure}
 
@@ -249,7 +249,7 @@ In our empirical experiments, the target stimulus evoked strong steady-state res
 \caption{Averaged Fourier spectrum and example contrast response functions. Panel (a) shows the spectrum for a high contrast target, with inset scalp plots showing SNRs at the first and second harmonic frequencies. The spectrum is taken from electrode Oz, indicated by the black points in the scalp plots. The shaded region and error bars indicate ±1 standard error. Panels (b) and (c) show example contrast response functions at the first and second harmonics at electrodes Oz, P1 and T7, averaged across participants (N=12). The inset scalp plots show how the saturation index varies across the head.}\label{fig:fftfig}
 \end{figure}
 
-To quantify how suppression varied across the scalp, and across different mask types and response frequencies, we fitted a hierarchical Bayesian model to the data. The first stage of this process involved estimating values for the three free parameters in equation \eqref{eq:GC1}. Figure \ref{fig:modelfig1}a shows an example fit at electrode \emph{Oz} for the low contrast mask experiment. The thick black line gives the fit using the posterior mean parameter estimates (\emph{p} = 1.94, \emph{Z} = 134.35, \(R_{max}\) = 4.8), and thin lines show predictions for 100 randomly sampled posterior parameter combinations. At the second stage of fitting, we estimated values of the suppressive parameters \emph{g} and \emph{r} for each mask type. Example fits are shown in Figure \ref{fig:modelfig1}b-e, with accompanying posterior distributions of parameter estimates in panels g-j. Note that the parameters are estimated individually for each participant, and the plots in Figure \ref{fig:modelfig1} show group level parameters, which do not necessarily correspond to the average data as well as an optimal least-squares fit. We assess whether a parameter makes a credible contribution to the response by determining whether the 95\% highest density interval of the posterior (shown by the black bars at the margins of Figure \ref{fig:modelfig1}g-j) exceeds 1. For all four examples shown in Figure \ref{fig:modelfig1}g-j, the contrast gain parameter (\emph{g}, y-axis) was credibly greater than 1, whereas the response gain parameter (\emph{r}, x-axis) was not credibly different from 1. This is evidence that all four mask types modulate responses via contrast gain control at electrode \emph{Oz}, for the first harmonic response.
+To quantify how suppression varied across the scalp, and across different mask types and response frequencies, we fitted a hierarchical Bayesian model to the data. The first stage of this process involved estimating values for the three free parameters in equation \eqref{eq:GC1}. Figure \ref{fig:modelfig1}a shows an example fit at electrode \emph{Oz} for the low contrast mask experiment. The thick black curve is the fit using the mean posterior parameter estimates (\emph{p} = 1.93, \emph{Z} = 134.7, \(R_{max}\) = 4.83), and thin lines show predictions for 100 randomly sampled posterior parameter combinations. At the second stage of fitting, we estimated values of the suppressive parameters \emph{g} and \emph{r} for each mask type. Example fits are shown in Figure \ref{fig:modelfig1}b-e, with accompanying posterior distributions of parameter estimates in panels g-j. Note that the parameters are estimated individually for each participant, and the plots in Figure \ref{fig:modelfig1} show group level parameters, which do not necessarily correspond to the average data as well as an optimal least-squares fit (the \(R^2\) values given in each plot likewise correspond to the fit to the invididual data). We assess whether a parameter makes a credible contribution to the response by determining whether the 95\% highest density interval of the posterior (shown by the black bars at the margins of Figure \ref{fig:modelfig1}g-j) exceeds 1. For all four examples shown in Figure \ref{fig:modelfig1}g-j, the contrast gain parameter (\emph{g}, y-axis) was credibly greater than 1, whereas the response gain parameter (\emph{r}, x-axis) was not credibly different from 1. This is evidence that all four mask types modulate responses via contrast gain control at electrode \emph{Oz}, for the first harmonic response.
 
 \begin{figure}
 
@@ -257,7 +257,7 @@ To quantify how suppression varied across the scalp, and across different mask t
 
 }
 
-\caption{Contrast response functions from electrode Oz, with example model fits and posterior parameter estimates. Panel (a) shows the data from the baseline (no mask) condition (points), plotted alongside model curves for the posterior mean of parameter estimates (thick curve), and random posterior samples (thin curves). Panels (b-e) show data for four types of mask in the same format (grey curves duplicate the mean fit from panel (a)), with the arrows indicating the mask contrast. Panel (f) shows the electrode location. Panels (g-j) show posterior density estimates for the response gain (x-axis) and contrast gain (y-axis) weight parameters. Red points show the means, dashed lines give the value expected in the case of no effect (a weight of 1), and grey and coloured distributions in the margins show the prior and posterior for each parameter. For all mask types, the contrast gain weight estimate was substantially greater than 1.}\label{fig:modelfig1}
+\caption{Contrast response functions from electrode Oz, with example model fits and posterior parameter estimates. Panel (a) shows the data from the baseline (no mask) condition (points), plotted alongside model curves for the mean posterior parameter estimates (thick curve), and random posterior samples (thin curves). Panels (b-e) show data for four types of mask in the same format (grey curves duplicate the mean fit from panel (a)), with the arrows indicating the mask contrast. The $R^2$ values are derived from the fits to the individual participant data, rather than the group averaged data plotted here. Panel (f) shows the electrode location. Panels (g-j) show posterior density estimates for the response gain (x-axis) and contrast gain (y-axis) weight parameters. Red points show the means, dashed lines give the value expected in the case of no effect (a weight of 1), and distributions along the margins show the prior (grey) and posterior (coloured) distributions for each parameter. For all mask types, the contrast gain weight estimate was substantially greater than 1.}\label{fig:modelfig1}
 \end{figure}
 
 \hypertarget{suppression-across-electrode-and-scalp-location}{%
@@ -280,10 +280,10 @@ We repeated the above analysis independently at each electrode, for each respons
 
 }
 
-\caption{Contrast response functions at the second harmonic frequency. Plotting conventions mirror those in Figure 3. Note that the lower SNR at 10 Hz results in noisier data and less precise posterior estimates than at 5 Hz.}\label{fig:modelfig2}
+\caption{Contrast response functions at the second harmonic frequency. Plotting conventions mirror those in Figure 4. Note that the lower SNR at 10 Hz results in noisier data and less precise posterior estimates than at 5 Hz.}\label{fig:modelfig2}
 \end{figure}
 
-Closer inspection of these results reveals some interesting subtleties and differences across mask conditions. Note in particular that the weights for surround suppression at the first harmonic are generally weaker at the occipital pole (electrodes \emph{Oz} and \emph{POz}) than for monocular and dichoptic suppression. But suppressive weights increase at bilateral electrodes over more parietal regions of cortex. For surround suppression, this might reflect the increased suppression in extra-striate cortical regions that have larger receptive fields. More generally, it suggests that suppression builds up across successive stages of processing. It also appears that, whereas suppression at the first harmonic is primarily due to contrast gain control, suppression at the second harmonic involves changes in both contrast and response gain (see lower two rows of Figures \ref{fig:modelheads1} \& \ref{fig:modelheads2}). This may well reflect the involvement of different classes of neurons - for example, second harmonic responses imply more severe nonlinearities, which might include suppression. This is also consistent with the greater saturation of the second harmonic response (inset to Figure \ref{fig:modelfig1}c).
+Closer inspection of these results reveals some interesting subtleties and differences across mask conditions. Note in particular that the contrast gain weights for surround suppression at the first harmonic are generally weaker at the occipital pole (electrodes \emph{Oz} and \emph{POz}) than for monocular and dichoptic suppression. We can use the posterior parameter distributions to calculate a Bayesian equivalent of a p-value for these comparisons to determine statistical significance. This analysis shows that at \emph{Oz} less than 5\% of the posterior distribution for aligned surrounds (\emph{p} = 0.006) and orthogonal surrounds (\emph{p} = 0.003) equals or exceeds the mean weight for monocular overlay masks (these are the distributions shown along the y-axes of Fig \ref{fig:modelfig1}g, i and j). Suppressive weights also increase at bilateral electrodes over more parietal regions of cortex, particularly for surround suppression. For example, the weights are greater at electrode \emph{P7} than \emph{Oz} for both aligned (\emph{p} = 0.001) and orthogonal (\emph{p} = 0.002) surrounds. This might reflect increased suppression in extra-striate cortical regions that have larger receptive fields. More generally, it suggests that suppression builds up across successive stages of processing. It also appears that, whereas suppression at the first harmonic is primarily due to contrast gain control, suppression at the second harmonic involves changes in both contrast and response gain (see lower two rows of Figures \ref{fig:modelheads1} \& \ref{fig:modelheads2}). This may well reflect the involvement of different classes of neurons - for example, second harmonic responses imply more severe nonlinearities (Regan and Regan, 1988), which might include suppression. This is also consistent with the greater saturation of the second harmonic response (inset to Figure \ref{fig:fftfig}c).
 
 \begin{figure}
 
@@ -318,7 +318,7 @@ We asked whether suppression from four types of mask could be best explained by 
 \hypertarget{contrast-and-response-gain-in-other-experimental-paradigms}{%
 \subsection{Contrast and response gain in other experimental paradigms}\label{contrast-and-response-gain-in-other-experimental-paradigms}}
 
-In single unit electrophysiology studies, overlay masking has long been attributed to contrast gain control, following the influential work of Heeger (1992; see also Tolhurst and Heeger, 1997; Bonds, 1989; Carandini and Heeger, 1994). Although subsequent work has questioned whether this suppression arises cortically or subcortically (Freeman et al., 2002; Li et al., 2006), the data remain consistent with a contrast gain effect. For dichoptic and surround masks, Sengpiel et al. (1998) demonstrated that response gain provided a better explanation of responses in V1 neurons (see also Li et al., 2005; Sengpiel and Blakemore, 1994; Webb et al., 2003). However these effects were layer-dependent, with layer 4 showing response gain effects, and other layers more consistent with contrast gain. Additionally, Sengpiel and Blakemore (1994) found strong response gain effects from the abrupt onset of a dichoptic mask, but only when the target was already present at mask onset. This suggests that interocular suppression may comprise multiple mechanisms, consistent with a variety of temporally-dependent perceptual suppression effects associated with binocular rivalry (e.g. Wolfe, 1984).
+In single unit electrophysiology studies, overlay masking has long been attributed to contrast gain control, following the influential work of Heeger (1992; see also Tolhurst and Heeger, 1997; Bonds, 1989; Carandini and Heeger, 1994). Although subsequent work has questioned whether this suppression arises cortically or subcortically (Freeman et al., 2002; Li et al., 2006), the data remain consistent with a contrast gain effect. For dichoptic and surround masks, Sengpiel et al. (1998) demonstrated that response gain provided a better explanation of responses in V1 neurons (see also Li et al., 2005; Sengpiel and Blakemore, 1994; Webb et al., 2003). However these effects were layer-dependent, with layer 4 showing response gain effects, and other layers more consistent with contrast gain. Additionally, Sengpiel and Blakemore (1994) found strong response gain effects from the abrupt onset of a dichoptic mask, but only when the target was already present at mask onset. This suggests that interocular suppression may comprise multiple mechanisms, consistent with a variety of temporally-dependent perceptual suppression effects associated with binocular rivalry (e.g. Wolfe, 1984). Recently, it has also been demonstrated that suppression of stimulus-evoked gamma responses can be explained by contrast gain effects (Wang et al., 2021).
 
 Some studies have used fMRI to investigate different types of suppression, though the analysis is less straightforward than with SSVEP as it is not possible to tag the target and mask at different frequencies to dissociate their effects. Moradi and Heeger (2009) measured fMRI responses to gratings with monocular and dichoptic cross-oriented masks. Their results were well-described by a contrast gain control model, though there are caveats in the interpretation given that the BOLD signal provides a single measure of the combined response to target and mask stimuli. Zenger-Landolt and Heeger (2003) measured surround suppression by carefully locating voxels that responded only to the target location in an independent localiser experiment. Their surround suppression data appear consistent with a response gain change, though they did not fit a model to confirm this.
 
@@ -326,10 +326,17 @@ Psychophysical masking studies have traditionally assumed contrast gain effects 
 
 Overall, our SSVEP findings complement other work in the literature on understanding masking effects. Differences between our findings and results from other paradigms might be a consequence of SSVEP signals primarily indexing particular classes of neurons (McKeefry et al., 1996) or cortical layers (Bruyns-Haylett et al., 2017). In addition, threshold psychophysics is typically assumed to probe only the most sensitive mechanisms that respond to a target, whereas SSVEP measures the full population response, which may behave differently.
 
+\hypertarget{model-variations-and-other-types-of-suppression}{%
+\subsection{Model variations and other types of suppression}\label{model-variations-and-other-types-of-suppression}}
+
+The model we present here is agnostic regarding the precise way in which contrast gain control is implemented, as we used only a single mask component at a fixed contrast in each experiment. Therefore any increase to the denominator term will have the required effect, and applying a modulatory weight (\emph{g}) to the saturation constant (\emph{z}) is a parsimonious approach. However more realistic models typically include a distinct denominator term representing the mask contrast, sometimes with a scaling factor (weight). Early formulations of the contrast gain control model assumed that each suppressive signal on the denominator is raised to an exponent before impacting the target mechanism (Foley, 1994), and that the gain pool was untuned (Heeger, 1992). This implementation is sufficient for many data sets, however there is abundant evidence that suppression is tuned for both orientation and spatial frequency (Baker and Meese, 2007; Meese and Holmes, 2010). Furthermore, psychophysical work comparing suppression from grating and plaid masks concluded that the mask components are summed linearly before impacting the target channel (Holmes and Meese, 2004). A similar arrangement also gives the best fit to multi-unit and gamma oscillation data recorded from cat visual cortex in response to plaids (Wang et al., 2021). In principle any of these variant models would give an equally good fit to our data set, but the parameterisation we chose allowed for clean comparison with response gain effects.
+
+More generally, there are other ways in which masks can affect target responses that we do not consider here. For example, subtractive inhibition is a plausible mechanism both in the retina (Barlow, 1953) and cortex (Ayaz and Chance, 2009). It has also been suggested that overlay masking is largely due to saturation of LGN responses implemented as a subtractive `push-pull' effect (Li et al., 2006), though this manifests as a contrast gain effect in cortex, and besides cannot explain suppression from surround or dichoptic masks. In psychophysical studies, masks can affect target detectability through other mechanisms like uncertainty (Pelli, 1985), distraction (Kontsevich and Tyler, 1999) and crowding (Pelli et al., 2004) that may impact the decision process rather than the low-level sensory response that is measured using SSVEP. However we do not require any of these processes to explain our data, and so do not consider them further.
+
 \hypertarget{why-do-ssvep-signals-sometimes-saturate}{%
 \subsection{Why do SSVEP signals sometimes saturate?}\label{why-do-ssvep-signals-sometimes-saturate}}
 
-Our results include examples of saturation at high target contrasts, particularly at the second harmonic frequency (see Figure \ref{fig:fftfig}c). More generally, the studies summarised in Figure \ref{fig:metaanalysis} show a wide range of behaviours from acceleration (see especially Chadnova et al., 2018; Smith et al., 2017; Vanegas et al., 2015) through to strong supersaturation (see especially Burr and Morrone, 1987; Tsai et al., 2012). Saturation indices for these studies range from -0.44 to 0.49 (see Table \ref{tab:metatable}).
+Our results include examples of saturation at high target contrasts, particularly at the second harmonic frequency (see Figure \ref{fig:fftfig}c). Second harmonic responses have previously been associated with different classes of neuron from the fundamental response (e.g. McKeefry et al., 1996), and imply the presence of one or more nonlinearities, such as squaring or rectification (Norcia et al., 2015; Regan and Regan, 1988). In principle a stronger nonlinearity might also result in the greater saturation we observe here at 10Hz. More generally, the studies summarised in Figure \ref{fig:metaanalysis} show a wide range of behaviours at the first harmonic, from acceleration (see especially Chadnova et al., 2018; Smith et al., 2017; Vanegas et al., 2015) through to strong supersaturation (see especially Burr and Morrone, 1987; Tsai et al., 2012). Saturation indices for these studies range from -0.44 to 0.49 (see Table \ref{tab:metatable}).
 
 There are several possible explanations for these differences. One possibility is that studies using a sweep-VEP paradigm, in which the stimulus contrast increases during a trial, might suffer from in-trial sequential adaptation effects that cause saturation towards high contrasts. Another explanation concerns the size and spectral content of the stimulus. Large stimuli will be subject to lateral suppression between adjacent areas of the stimulus, via the same mechanism that causes surround suppression. This would be expected to cause saturation at higher contrasts, where suppressive effects are strongest. The same argument holds in the Fourier domain for stimuli that are spectrally broadband, and so stimulate neurons responsive to a range of orientations and spatial frequencies. These neurons will mutually inhibit each other via the overlay masking pathway, again causing saturation. Several studies used large broadband noise textures as stimuli, most notably the study of Tsai et al. (2012), which shows some of the strongest supersaturation. Other paradigms use small, spatially local patches of narrowband sine wave grating (e.g. Smith et al., 2017), which instead tend to produce accelerating responses. (Super)saturation may therefore provide an additional estimate of suppression strength, that could be leveraged in studies investigating group or individual differences in suppression. For discussion of the potential importance of supersaturation in individual neurons, see Peirce (2007).
 
@@ -362,8 +369,14 @@ Albrecht DG, Farrar SB, Hamilton DB. 1984. Spatial contrast adaptation character
 \leavevmode\hypertarget{ref-Aschner2018}{}%
 Aschner A, Solomon SG, Landy MS, Heeger DJ, Kohn A. 2018. Temporal contingencies determine whether adaptation strengthens or weakens normalization. \emph{J Neurosci} \textbf{38}:10129--10142. doi:\href{https://doi.org/10.1523/JNEUROSCI.1131-18.2018}{10.1523/JNEUROSCI.1131-18.2018}
 
+\leavevmode\hypertarget{ref-Ayaz2009}{}%
+Ayaz A, Chance FS. 2009. Gain modulation of neuronal responses by subtractive and divisive mechanisms of inhibition. \emph{J Neurophysiol} \textbf{101}:958--68. doi:\href{https://doi.org/10.1152/jn.90547.2008}{10.1152/jn.90547.2008}
+
 \leavevmode\hypertarget{ref-Baker2013}{}%
 Baker DH, Cass JR. 2013. A dissociation of performance and awareness during binocular rivalry. \emph{Psychol Sci} \textbf{24}:2563--8. doi:\href{https://doi.org/10.1177/0956797613496824}{10.1177/0956797613496824}
+
+\leavevmode\hypertarget{ref-Baker2007b}{}%
+Baker DH, Meese TS. 2007. Binocular contrast interactions: Dichoptic masking is not a single process. \emph{Vision Res} \textbf{47}:3096--107. doi:\href{https://doi.org/10.1016/j.visres.2007.08.013}{10.1016/j.visres.2007.08.013}
 
 \leavevmode\hypertarget{ref-Baker2007}{}%
 Baker DH, Meese TS, Summers RJ. 2007. Psychophysical evidence for two routes to suppression before binocular summation of signals in human vision. \emph{Neuroscience} \textbf{146}:435--48. doi:\href{https://doi.org/10.1016/j.neuroscience.2007.01.030}{10.1016/j.neuroscience.2007.01.030}
@@ -376,6 +389,9 @@ Baker DH, Vilidaitė G. 2014. Broadband noise masks suppress neural responses to
 
 \leavevmode\hypertarget{ref-Baker2017}{}%
 Baker DH, Wade AR. 2017. Evidence for an optimal algorithm underlying signal combination in human visual cortex. \emph{Cereb Cortex} \textbf{27}:254--264. doi:\href{https://doi.org/10.1093/cercor/bhw395}{10.1093/cercor/bhw395}
+
+\leavevmode\hypertarget{ref-Barlow1953}{}%
+Barlow HB. 1953. Summation and inhibition in the frog's retina. \emph{J Physiol} \textbf{119}:69--88. doi:\href{https://doi.org/10.1113/jphysiol.1953.sp004829}{10.1113/jphysiol.1953.sp004829}
 
 \leavevmode\hypertarget{ref-Benjamin2018}{}%
 Benjamin AV, Wailes-Newson K, Ma-Wyatt A, Baker DH, Wade AR. 2018. The effect of locomotion on early visual contrast processing in humans. \emph{J Neurosci} \textbf{38}:3050--3059. doi:\href{https://doi.org/10.1523/JNEUROSCI.1428-17.2017}{10.1523/JNEUROSCI.1428-17.2017}
@@ -428,6 +444,9 @@ Freeman TCB, Durand S, Kiper DC, Carandini M. 2002. Suppression without inhibiti
 \leavevmode\hypertarget{ref-Heeger1992}{}%
 Heeger DJ. 1992. Normalization of cell responses in cat striate cortex. \emph{Vis Neurosci} \textbf{9}:181--97. doi:\href{https://doi.org/10.1017/s0952523800009640}{10.1017/s0952523800009640}
 
+\leavevmode\hypertarget{ref-Holmes2004}{}%
+Holmes DJ, Meese TS. 2004. Grating and plaid masks indicate linear summation in a contrast gain pool. \emph{J Vis} \textbf{4}:1080--9. doi:\href{https://doi.org/10.1167/4.12.7}{10.1167/4.12.7}
+
 \leavevmode\hypertarget{ref-Hou2020}{}%
 Hou C, Nicholas SC, Verghese P. 2020. Contrast normalization accounts for binocular interactions in human striate and extra-striate visual cortex. \emph{J Neurosci} \textbf{40}:2753--2763. doi:\href{https://doi.org/10.1523/JNEUROSCI.2043-19.2020}{10.1523/JNEUROSCI.2043-19.2020}
 
@@ -436,6 +455,9 @@ Itthipuripat S, Sprague TC, Serences JT. 2019. Functional mri and eeg index comp
 
 \leavevmode\hypertarget{ref-Kohn2003}{}%
 Kohn A, Movshon JA. 2003. Neuronal adaptation to visual motion in area mt of the macaque. \emph{Neuron} \textbf{39}:681--91. doi:\href{https://doi.org/10.1016/s0896-6273(03)00438-0}{10.1016/s0896-6273(03)00438-0}
+
+\leavevmode\hypertarget{ref-Kontsevich1999}{}%
+Kontsevich LL, Tyler CW. 1999. Distraction of attention and the slope of the psychometric function. \emph{J Opt Soc Am A Opt Image Sci Vis} \textbf{16}:217--22. doi:\href{https://doi.org/10.1364/josaa.16.000217}{10.1364/josaa.16.000217}
 
 \leavevmode\hypertarget{ref-Kruschke2014}{}%
 Kruschke JK. 2014. Doing Bayesian data analysis: a tutorial with R, JAGS, and Stan, 2nd ed. Elsevier, Academic Press.
@@ -458,6 +480,9 @@ McKeefry DJ, Russell MH, Murray IJ, Kulikowski JJ. 1996. Amplitude and phase var
 \leavevmode\hypertarget{ref-Meese2009}{}%
 Meese TS, Challinor KL, Summers RJ, Baker DH. 2009. Suppression pathways saturate with contrast for parallel surrounds but not for superimposed cross-oriented masks. \emph{Vision Res} \textbf{49}:2927--35. doi:\href{https://doi.org/10.1016/j.visres.2009.09.006}{10.1016/j.visres.2009.09.006}
 
+\leavevmode\hypertarget{ref-Meese2010}{}%
+Meese TS, Holmes DJ. 2010. Orientation masking and cross-orientation suppression (XOS): Implications for estimates of filter bandwidth. \emph{J Vis} \textbf{10}:9. doi:\href{https://doi.org/10.1167/10.12.9}{10.1167/10.12.9}
+
 \leavevmode\hypertarget{ref-Moradi2009}{}%
 Moradi F, Heeger DJ. 2009. Inter-ocular contrast normalization in human visual cortex. \emph{J Vis} \textbf{9}:13.1--22. doi:\href{https://doi.org/10.1167/9.3.13}{10.1167/9.3.13}
 
@@ -473,11 +498,20 @@ Pei F, Baldassi S, Tsai JJ, Gerhard HE, Norcia AM. 2017. Development of contrast
 \leavevmode\hypertarget{ref-Peirce2007}{}%
 Peirce JW. 2007. The potential importance of saturating and supersaturating contrast response functions in visual cortex. \emph{J Vis} \textbf{7(6)}:13. doi:\href{https://doi.org/10.1167/7.6.13}{10.1167/7.6.13}
 
+\leavevmode\hypertarget{ref-Pelli1985}{}%
+Pelli DG. 1985. Uncertainty explains many aspects of visual contrast detection and discrimination. \emph{J Opt Soc Am A} \textbf{2}:1508--32. doi:\href{https://doi.org/10.1364/josaa.2.001508}{10.1364/josaa.2.001508}
+
+\leavevmode\hypertarget{ref-Pelli2004}{}%
+Pelli DG, Palomares M, Majaj NJ. 2004. Crowding is unlike ordinary masking: Distinguishing feature integration from detection. \emph{J Vis} \textbf{4}:1136--69. doi:\href{https://doi.org/10.1167/4.12.12}{10.1167/4.12.12}
+
 \leavevmode\hypertarget{ref-Petrov2005}{}%
 Petrov Y, Carandini M, McKee S. 2005. Two distinct mechanisms of suppression in human vision. \emph{J Neurosci} \textbf{25}:8704--7. doi:\href{https://doi.org/10.1523/JNEUROSCI.2871-05.2005}{10.1523/JNEUROSCI.2871-05.2005}
 
 \leavevmode\hypertarget{ref-Polat1996}{}%
 Polat U, Norcia AM. 1996. Neurophysiological evidence for contrast dependent long-range facilitation and suppression in the human visual cortex. \emph{Vision Res} \textbf{36}:2099--109. doi:\href{https://doi.org/10.1016/0042-6989(95)00281-2}{10.1016/0042-6989(95)00281-2}
+
+\leavevmode\hypertarget{ref-Regan1988}{}%
+Regan M, Regan D. 1988. A frequency domain technique for characterizing nonlinearities in biological systems. \emph{Journal of Theoretical Biology} \textbf{133}:293--317. doi:\href{https://doi.org/https://doi.org/10.1016/S0022-5193(88)80323-0}{https://doi.org/10.1016/S0022-5193(88)80323-0}
 
 \leavevmode\hypertarget{ref-Rohatgi2020}{}%
 Rohatgi A. 2020. WebPlotDigitizer: Version 4.4. https://automeris.io/WebPlotDigitizer.
@@ -511,6 +545,9 @@ Vanegas MI, Blangero A, Galvin JE, Di Rocco A, Quartarone A, Ghilardi MF, Kelly 
 
 \leavevmode\hypertarget{ref-Vanegas2015}{}%
 Vanegas MI, Blangero A, Kelly SP. 2015. Electrophysiological indices of surround suppression in humans. \emph{J Neurophysiol} \textbf{113}:1100--9. doi:\href{https://doi.org/10.1152/jn.00774.2014}{10.1152/jn.00774.2014}
+
+\leavevmode\hypertarget{ref-Wang2021}{}%
+Wang B, Han C, Wang T, Dai W, Li Y, Yang Y, Yang G, Zhong L, Zhang Y, Wu Y, Wang G, Yu H, Xing D. 2021. Superimposed gratings induce diverse response patterns of gamma oscillations in primary visual cortex. \emph{Sci Rep} \textbf{11}:4941. doi:\href{https://doi.org/10.1038/s41598-021-83923-5}{10.1038/s41598-021-83923-5}
 
 \leavevmode\hypertarget{ref-Watanabe2004}{}%
 Watanabe K, Paik Y, Blake R. 2004. Preserved gain control for luminance contrast during binocular rivalry suppression. \emph{Vision Res} \textbf{44}:3065--71. doi:\href{https://doi.org/10.1016/j.visres.2004.07.011}{10.1016/j.visres.2004.07.011}
