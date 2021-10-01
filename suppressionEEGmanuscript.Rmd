@@ -525,7 +525,7 @@ if (runcode==1){
       Cvals <<- bl$C[i]
       yvals <<- bl$y[i]
       sout <- nelder_mead(fitbaseline,log10(c(100,2,4)))
-      paramlist[s,1:3] <- 10^sout$optbase$xopt
+      paramlist[s,1:3] <- 10^sout$xmin
     }
     
     mm <- droplevels(subset(thiscond, Condition==2, select=c('Study','Contrast','SNR')))
@@ -1949,7 +1949,7 @@ We asked if four types of masking are best explained by contrast gain or respons
 
 # Acknowledgements
 
-Supported by the Royal Society (grant number RG130121 to DHB). 
+DHB supported by the Royal Society (grant number RG130121; https://royalsociety.org/). The funders had no role in study design, data collection and analysis, decision to publish, or preparation of the manuscript.
 
 # References
 
